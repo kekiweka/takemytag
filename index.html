@@ -3,212 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeMyTag Market</title>
+    <title>TakeMyTag Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            margin: 0;
-            padding: 20px;
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
         }
 
         .balance-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 15px;
-            border-radius: 12px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 20px;
             text-align: center;
-            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
         }
 
-        .balance-amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--tg-theme-button-color, #2481cc);
+        .balance-label { color: var(--text-dim); font-size: 14px; margin-bottom: 8px; }
+        .balance-value { font-size: 32px; font-weight: 800; color: var(--accent-color); }
+
+        .input-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
         }
 
-        .section-title {
-            font-size: 18px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-dim); }
 
         input {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--tg-theme-hint-color, #999999);
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
             box-sizing: border-box;
             outline: none;
         }
 
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
+        input:focus { border-color: var(--accent-color); }
+
+        .btn-main {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 16px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        button:active {
-            opacity: 0.8;
-        }
+        .btn-main:active { transform: scale(0.98); }
 
-        .lot-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+        .lot-item {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(0,0,0,0.05);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .lot-tag { font-weight: 600; font-size: 16px; }
+        .lot-price { color: #10b981; font-weight: 700; }
+
+        /* Custom Modal */
+        #custom-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 24px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .step-num {
+            background: var(--accent-color);
+            color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            margin-bottom: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div id="user-name">Загрузка...</div>
-    </div>
-
     <div class="balance-card">
-        <div>Ваш баланс</div>
-        <div class="balance-amount" id="user-balance">0.00 TON</div>
+        <div class="balance-label">Доступный баланс</div>
+        <div class="balance-value" id="user-balance">0.00 TON</div>
     </div>
 
-    <div class="section-title">Выставить на продажу</div>
-    <div class="input-group">
-        <input type="text" id="username-input" placeholder="Юзернейм (например: my_tag)">
-    </div>
-    <div class="input-group">
-        <input type="number" id="price-input" placeholder="Цена в TON">
-    </div>
-    <button onclick="createLot()">Выставить на маркет</button>
-
-    <div class="section-title" style="margin-top: 30px;">Активные лоты</div>
-    <div id="lots-container">
+    <div class="input-box">
+        <div class="section-title" style="margin-bottom: 15px; font-weight: bold;">💎 Продать юзернейм</div>
+        <div class="input-group">
+            <input type="text" id="username-input" placeholder="Например: my_cool_tag">
         </div>
+        <div class="input-group">
+            <input type="number" id="price-input" placeholder="Цена в TON">
+        </div>
+        <button class="btn-main" onclick="openConfirmModal()">Выставить на продажу</button>
+    </div>
+
+    <div style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">🔥 Витрина тегов</div>
+    <div id="lots-container"></div>
+
+    <div id="custom-modal">
+        <div class="modal-content">
+            <div id="modal-body"></div>
+            <button class="btn-main" onclick="confirmAndSend()" style="margin-top: 20px;">Понятно, выставляем!</button>
+            <button onclick="closeModal()" style="background: none; border: none; color: #94a3b8; margin-top: 15px; cursor: pointer;">Отмена</button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); 
-
-        // 🔗 Твоя актуальная ссылка из Ngrok
         const API_URL = "https://rapt-noella-myriadly.ngrok-free.dev/api";
         const user = tg.initDataUnsafe.user;
+        const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
 
-        // 🔑 Тот самый "ключ", который отключает предупреждение ngrok
-        const requestHeaders = {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
-        };
-
-        if (user) {
-            document.getElementById('user-name').innerText = `Привет, ${user.first_name}!`;
-            fetchUserData();
-            fetchLots();
-        }
+        if (user) { fetchUserData(); fetchLots(); }
 
         async function fetchUserData() {
             try {
-                // Добавляем заголовки здесь
-                const response = await fetch(`${API_URL}/users/${user.id}`, {
-                    headers: requestHeaders
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('user-balance').innerText = `${data.balance.toFixed(2)} TON`;
-                }
-            } catch (e) {
-                console.error("Ошибка загрузки профиля", e);
-            }
+                const res = await fetch(`${API_URL}/users/${user.id}`, { headers });
+                const data = await res.json();
+                document.getElementById('user-balance').innerText = `${data.balance.toFixed(2)} TON`;
+            } catch (e) {}
         }
 
         async function fetchLots() {
             try {
-                // И здесь тоже
-                const response = await fetch(`${API_URL}/lots`, {
-                    headers: requestHeaders
-                });
-                if (response.ok) {
-                    const lots = await response.json();
-                    const container = document.getElementById('lots-container');
-                    container.innerHTML = '';
-                    
-                    if (lots.length === 0) {
-                        container.innerHTML = '<div style="color: gray; text-align: center;">Нет активных лотов</div>';
-                    }
-
-                    lots.forEach(lot => {
-                        container.innerHTML += `
-                            <div class="lot-card">
-                                <div><strong>@${lot.target_username}</strong></div>
-                                <div style="color: var(--tg-theme-button-color)">${lot.price} TON</div>
-                            </div>
-                        `;
-                    });
-                }
-            } catch (e) {
-                console.error("Ошибка загрузки лотов", e);
-            }
+                const res = await fetch(`${API_URL}/lots`, { headers });
+                const lots = await res.json();
+                const container = document.getElementById('lots-container');
+                container.innerHTML = lots.map(lot => `
+                    <div class="lot-item">
+                        <div>
+                            <div class="lot-tag">@${lot.target_username}</div>
+                            <div style="font-size: 12px; color: #94a3b8;">Статус: Активен</div>
+                        </div>
+                        <div class="lot-price">${lot.price} TON</div>
+                    </div>
+                `).join('') || '<div style="text-align:center; color:#94a3b8;">Пока пусто...</div>';
+            } catch (e) {}
         }
 
-        async function createLot() {
-            const username = document.getElementById('username-input').value.replace('@', '').trim();
+        function openConfirmModal() {
+            const tag = document.getElementById('username-input').value;
             const price = document.getElementById('price-input').value;
+            if(!tag || !price) return tg.showAlert("Заполни поля!");
 
-            if (!username || !price) {
-                tg.showAlert("Заполните все поля!");
-                return;
-            }
-
-            tg.showConfirm(`Выставить @${username} за ${price} TON?`, async (ok) => {
-                if (ok) {
-                    try {
-                        const response = await fetch(`${API_URL}/lots`, {
-                            method: 'POST',
-                            headers: requestHeaders, // Важно добавить сюда!
-                            body: JSON.stringify({
-                                user_id: user.id,
-                                target_username: username,
-                                price: parseFloat(price)
-                            })
-                        });
-
-                        if (response.ok) {
-                            tg.showAlert("✅ Лот создан! Теперь передайте права боту-холдеру.");
-                            document.getElementById('username-input').value = '';
-                            document.getElementById('price-input').value = '';
-                            fetchLots();
-                        } else {
-                            tg.showAlert("❌ Ошибка при создании лота.");
-                        }
-                    } catch (e) {
-                        tg.showAlert("❌ Ошибка связи с сервером. Проверьте Ngrok!");
-                    }
-                }
-            });
+            document.getElementById('modal-body').innerHTML = `
+                <h2 style="margin-top:0">Почти готово!</h2>
+                <div style="text-align:left; font-size: 14px;">
+                    <p><span class="step-num">1</span> Подтвердите цену: <b>${price} TON</b></p>
+                    <p><span class="step-num">2</span> После нажатия кнопки передайте права владельца канала <b>@${tag}</b> нашему аккаунту:</p>
+                    <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center; font-weight:bold; color:#38bdf8;">
+                        @nezemnayazaya
+                    </div>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:10px;">🛡️ Как только права будут переданы, лот автоматически станет активным.</p>
+                </div>
+            `;
+            document.getElementById('custom-modal').style.display = 'flex';
         }
 
-        // Авто-обновление списка каждые 15 секунд
+        async function confirmAndSend() {
+            const tag = document.getElementById('username-input').value;
+            const price = document.getElementById('price-input').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/lots`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price) })
+                });
+                if (res.ok) {
+                    closeModal();
+                    tg.showAlert("Отлично! Ждем передачи прав на @nezemnayazaya");
+                    fetchLots();
+                } else {
+                    const data = await res.json();
+                    tg.showAlert(data.detail || "Ошибка");
+                }
+            } catch (e) { tg.showAlert("Ошибка сети"); }
+        }
+
+        function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
         setInterval(fetchLots, 15000);
     </script>
 </body>
