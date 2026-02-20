@@ -81,13 +81,6 @@
             align-items: center;
             border: 1px solid rgba(0,0,0,0.05);
         }
-
-        .status-badge {
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #e1e1e1;
-        }
     </style>
 </head>
 <body>
@@ -118,11 +111,11 @@
         const tg = window.Telegram.WebApp;
         tg.expand(); 
 
-        // 🔗 Твоя ссылка из Ngrok
+        // 🔗 Твоя актуальная ссылка из Ngrok
         const API_URL = "https://rapt-noella-myriadly.ngrok-free.dev/api";
         const user = tg.initDataUnsafe.user;
 
-        // 🔑 Заголовки для обхода защиты Ngrok и работы с JSON
+        // 🔑 Тот самый "ключ", который отключает предупреждение ngrok
         const requestHeaders = {
             'Content-Type': 'application/json',
             'ngrok-skip-browser-warning': 'true'
@@ -132,34 +125,36 @@
             document.getElementById('user-name').innerText = `Привет, ${user.first_name}!`;
             fetchUserData();
             fetchLots();
-        } else {
-            document.getElementById('user-name').innerText = "Ошибка: откройте через Telegram";
         }
 
-        // 1. Получаем данные пользователя (баланс)
         async function fetchUserData() {
             try {
-                const response = await fetch(`${API_URL}/users/${user.id}`, { headers: requestHeaders });
+                // Добавляем заголовки здесь
+                const response = await fetch(`${API_URL}/users/${user.id}`, {
+                    headers: requestHeaders
+                });
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('user-balance').innerText = `${data.balance.toFixed(2)} TON`;
                 }
             } catch (e) {
-                console.error("Ошибка загрузки баланса", e);
+                console.error("Ошибка загрузки профиля", e);
             }
         }
 
-        // 2. Получаем список активных лотов
         async function fetchLots() {
             try {
-                const response = await fetch(`${API_URL}/lots`, { headers: requestHeaders });
+                // И здесь тоже
+                const response = await fetch(`${API_URL}/lots`, {
+                    headers: requestHeaders
+                });
                 if (response.ok) {
                     const lots = await response.json();
                     const container = document.getElementById('lots-container');
                     container.innerHTML = '';
                     
                     if (lots.length === 0) {
-                        container.innerHTML = '<div style="color: gray; text-align: center;">Пока нет активных лотов</div>';
+                        container.innerHTML = '<div style="color: gray; text-align: center;">Нет активных лотов</div>';
                     }
 
                     lots.forEach(lot => {
@@ -176,24 +171,21 @@
             }
         }
 
-        // 3. Отправляем новый лот на продажу
         async function createLot() {
             const username = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
 
             if (!username || !price) {
-                tg.showAlert("Пожалуйста, заполните все поля!");
+                tg.showAlert("Заполните все поля!");
                 return;
             }
 
-            tg.showConfirm(`Вы точно хотите выставить @${username} за ${price} TON?`, async (ok) => {
+            tg.showConfirm(`Выставить @${username} за ${price} TON?`, async (ok) => {
                 if (ok) {
                     try {
-                        tg.MainButton.setText("ОТПРАВКА...").show();
-                        
                         const response = await fetch(`${API_URL}/lots`, {
                             method: 'POST',
-                            headers: requestHeaders,
+                            headers: requestHeaders, // Важно добавить сюда!
                             body: JSON.stringify({
                                 user_id: user.id,
                                 target_username: username,
@@ -201,26 +193,22 @@
                             })
                         });
 
-                        tg.MainButton.hide();
-
                         if (response.ok) {
-                            tg.showAlert("✅ Лот успешно создан!\n\nТеперь передайте права владельца канала нашему аккаунту-холдеру.");
+                            tg.showAlert("✅ Лот создан! Теперь передайте права боту-холдеру.");
                             document.getElementById('username-input').value = '';
                             document.getElementById('price-input').value = '';
-                            fetchLots(); // Обновляем список
+                            fetchLots();
                         } else {
-                            const err = await response.json();
-                            tg.showAlert(`❌ Ошибка: ${err.detail || "не удалось создать лот"}`);
+                            tg.showAlert("❌ Ошибка при создании лота.");
                         }
                     } catch (e) {
-                        tg.MainButton.hide();
-                        tg.showAlert("❌ Ошибка связи с сервером. Проверьте Ngrok на компьютере!");
+                        tg.showAlert("❌ Ошибка связи с сервером. Проверьте Ngrok!");
                     }
                 }
             });
         }
 
-        // Каждые 15 секунд обновляем список лотов автоматически
+        // Авто-обновление списка каждые 15 секунд
         setInterval(fetchLots, 15000);
     </script>
 </body>
