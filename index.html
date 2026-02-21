@@ -523,10 +523,38 @@
         }
 
         // --- ЗАЩИЩЕННАЯ ПОКУПКА С КОММЕНТАРИЕМ ---
+// --- ПОКУПКА С ПРОВЕРКОЙ ВНУТРЕННЕГО БАЛАНСА ---
         async function buyLotWithWallet(lotId, price) {
+            // 1. Проверяем, есть ли деньги на внутреннем балансе
+            let availElement = document.getElementById('avail-balance');
+            let internalBalance = availElement ? parseFloat(availElement.innerText) : 0;
+
+            if (internalBalance >= price) {
+                // Денег хватает! Предлагаем оплатить без блокчейна
+                if (confirm(`У вас на балансе ${internalBalance} TON.\nСписать ${price} TON для покупки этого лота?`)) {
+                    try {
+                        const res = await fetch(`${API_URL}/lots/${lotId}/buy-internal`, {
+                            method: 'POST', headers, body: JSON.stringify({ buyer_id: user.id })
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            tg.showAlert("✅ Лот успешно куплен с вашего внутреннего баланса!");
+                            fetchLots();
+                            fetchUserData();
+                        } else {
+                            tg.showAlert(data.detail || "Ошибка при покупке");
+                        }
+                    } catch(e) { tg.showAlert("Ошибка сервера"); }
+                    
+                    return; // Останавливаем функцию, внешний кошелек открывать не нужно!
+                }
+            }
+
+            // 2. Если денег нет или юзер отказался — открываем оплату через TonSpace
             if (!tonConnectUI.connected) return tg.showAlert("Сначала подключите кошелек!");
 
-            // 1. Создаем защитный комментарий для блокчейна через TonWeb
+            // Создаем защитный комментарий для блокчейна через TonWeb
             const comment = `buy_lot_${lotId}`;
             const cell = new TonWeb.boc.Cell();
             cell.bits.writeUint(0, 32); // 0 означает, что это текстовый комментарий
@@ -534,23 +562,20 @@
             const payloadBytes = await cell.toBoc(false);
             const payloadBase64 = TonWeb.utils.bytesToBase64(payloadBytes);
 
-            // 2. Отправляем транзакцию с Payload
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 360,
                 messages: [{
                     address: "UQDKJrZT85ZyMPVkc0d2Q3kPIzOb4YEmJSb-oVtAZE-71AaU",
                     amount: (price * 1000000000).toString(),
-                    payload: payloadBase64 // <-- ВОТ ОНА, МАГИЯ ЗАЩИТЫ!
+                    payload: payloadBase64
                 }]
             };
 
             try {
                 await tonConnectUI.sendTransaction(transaction);
                 tg.showAlert("Транзакция отправлена! Ждем подтверждения сети...");
-                
                 await fetch(`${API_URL}/lots/${lotId}/verify-payment`, {
-                    method: 'POST', headers,
-                    body: JSON.stringify({ boc: "sent", buyer_id: user.id })
+                    method: 'POST', headers, body: JSON.stringify({ boc: "sent", buyer_id: user.id })
                 });
             } catch (e) { tg.showAlert("Оплата отменена"); }
         }
