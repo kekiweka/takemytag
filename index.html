@@ -8,6 +8,8 @@
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
     
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg-color: #0f172a;
@@ -17,11 +19,12 @@
             --text-dim: #94a3b8;
             --success: #10b981;
             --warning: #f59e0b;
+            --error: #ef4444;
         }
 
-        /* --- НОВЫЙ ФОН: КЛЕТКА (СЕТКА) --- */
+        /* --- ПРИМЕНЯЕМ НОВЫЙ ШРИФТ КО ВСЕМУ ПРИЛОЖЕНИЮ --- */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-color);
             background-image: 
                 linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
@@ -35,6 +38,48 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
+
+        /* --- ВСТРОЕННЫЕ УВЕДОМЛЕНИЯ (ТОСТЫ) --- */
+        #toast-container {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+            pointer-events: none; /* Чтобы клики проходили сквозь них */
+        }
+
+        .custom-toast {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--accent-color);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            animation: slideDown 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(-20px);
+            line-height: 1.4;
+        }
+
+        .custom-toast.error { border-left-color: var(--error); }
+        .custom-toast.success { border-left-color: var(--success); }
+        .custom-toast.fade-out { animation: fadeOut 0.3s ease-in forwards; }
+
+        @keyframes slideDown { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
 
         /* --- ЗАГРУЗОЧНЫЙ ЭКРАН (LOADER) --- */
         #loader {
@@ -51,9 +96,7 @@
         }
 
         .loader-logo {
-            width: 140px;
-            height: 140px;
-            border-radius: 25px;
+            width: 140px; height: 140px; border-radius: 25px;
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
             margin-bottom: 25px;
             animation: pulse 2s infinite ease-in-out;
@@ -66,70 +109,40 @@
             100% { transform: scale(0.95); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
         }
 
-        .loader-title {
-            font-size: 26px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #0ea5e9, #f8fafc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
-        }
+        .loader-title { font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #0ea5e9, #f8fafc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 25px; letter-spacing: 1px; }
+        .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; }
+        .loader-bar { height: 100%; width: 0%; background: var(--accent-color); border-radius: 10px; box-shadow: 0 0 10px var(--accent-color); transition: width 0.1s linear; }
+        .loader-percent { margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
 
-        .loader-bar-container {
-            width: 60%;
-            max-width: 250px;
-            height: 6px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loader-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-color);
-            border-radius: 10px;
-            box-shadow: 0 0 10px var(--accent-color);
-            transition: width 0.1s linear;
-        }
-
-        .loader-percent {
-            margin-top: 15px;
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--accent-color);
-            letter-spacing: 2px;
-        }
-
-        /* --- ОСТАЛЬНЫЕ СТИЛИ (КАК БЫЛИ) --- */
+        /* --- ОСТАЛЬНЫЕ СТИЛИ --- */
         #ton-connect-button { display: flex; justify-content: center; margin-bottom: 20px; }
         .balance-card { background: var(--card-bg); backdrop-filter: blur(12px); padding: 20px; border-radius: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
         .balance-label { color: var(--text-dim); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
         .balance-value { font-size: 28px; font-weight: 800; color: var(--accent-color); margin-top: 5px; }
         .input-box { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); }
-        input, select { width: 100%; padding: 14px; margin-bottom: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        input, select { width: 100%; padding: 14px; margin-bottom: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-family: 'Montserrat', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
         input:focus, select:focus { border-color: var(--accent-color); }
-        .btn-main { background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-        .btn-small { padding: 10px; font-size: 14px; border-radius: 10px; }
+        .btn-main { background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+        .btn-small { padding: 10px; font-size: 13px; border-radius: 10px; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-left: 5px; }
         .lot-item { background: var(--card-bg); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .buy-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .buy-btn { background: var(--success); color: white; font-family: 'Montserrat', sans-serif; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
-        .nav-item { color: var(--text-dim); font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
+        .nav-item { color: var(--text-dim); font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.3s; text-align: center; }
         .nav-item.active { color: var(--accent-color); }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
         #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1e293b; padding: 30px; border-radius: 28px; width: 85%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .step-num { background: var(--accent-color); color: white; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; }
+        .step-num { background: var(--accent-color); color: white; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; font-weight: bold;}
         .timer-text { font-size: 34px; font-weight: 800; color: #ef4444; margin: 15px 0; letter-spacing: 2px; }
     </style>
 </head>
 <body>
+
+    <div id="toast-container"></div>
 
     <div id="loader">
         <img src="logo.jpg" alt="TakeMyTag Logo" class="loader-logo">
@@ -224,7 +237,7 @@
                     <p style="font-size:11px; color:var(--text-dim); margin-top:12px;">🛡️ Юзербот автоматически выставит лот на витрину, как только получит права.</p>
                 </div>
                 <button class="btn-main" onclick="confirmAndSend()" style="margin-top: 25px;">Выставить и начать таймер</button>
-                <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px;">Отмена</button>
+                <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600;">Отмена</button>
             </div>
 
             <div id="modal-step-2" style="display: none;">
@@ -258,14 +271,27 @@
         let timerInterval;
         let statusInterval;
 
-        // --- ЛОГИКА ЗАГРУЗОЧНОГО ЭКРАНА (2 секунды) ---
+        // --- МАГИЯ УВЕДОМЛЕНИЙ (ЗАМЕНА tg.showAlert) ---
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = message.replace(/\n/g, '<br>');
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- ЛОГИКА ЗАГРУЗОЧНОГО ЭКРАНА ---
         document.addEventListener("DOMContentLoaded", () => {
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
             const barEl = document.getElementById("loader-bar");
             const loader = document.getElementById("loader");
 
-            // Увеличиваем на 2% каждые 40мс (в сумме 2000мс = 2 секунды)
             const interval = setInterval(() => {
                 percent += 2; 
                 if (percent >= 100) percent = 100;
@@ -276,14 +302,13 @@
                 if (percent === 100) {
                     clearInterval(interval);
                     setTimeout(() => {
-                        loader.style.opacity = "0"; // Плавное затухание
-                        setTimeout(() => loader.style.display = "none", 500); // Полное скрытие
-                    }, 300); // Небольшая задержка перед скрытием для красоты
+                        loader.style.opacity = "0"; 
+                        setTimeout(() => loader.style.display = "none", 500); 
+                    }, 300); 
                 }
             }, 40);
         });
 
-        // Инициализация TonConnect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://takemytag.vercel.app/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
@@ -293,7 +318,6 @@
             document.getElementById('wallet-status').innerText = wallet ? "Подключен ✅" : "Не подключен ❌";
         });
 
-        // --- ПОЛУЧЕНИЕ ПРОФИЛЯ ---
         async function fetchUserData() {
             if (!user) return;
             try {
@@ -306,7 +330,6 @@
             } catch (e) { console.error("DB Sync Error", e); }
         }
 
-        // --- ВИТРИНА ---
         async function fetchLots() {
             try {
                 const res = await fetch(`${API_URL}/lots`, { headers });
@@ -341,7 +364,6 @@
             `).join('');
         }
 
-        // --- ПРОФИЛЬ ---
         async function renderProfile() {
             if(!user) return;
             try {
@@ -379,10 +401,10 @@
             if(!newPrice || isNaN(newPrice)) return;
             try {
                 await fetch(`${API_URL}/lots/${lotId}/price`, { method: 'PATCH', headers, body: JSON.stringify({ new_price: parseFloat(newPrice) }) });
-                tg.showAlert("Цена успешно обновлена!");
+                showNotification("Цена успешно обновлена!", "success");
                 renderProfile();
                 fetchLots();
-            } catch(e) { tg.showAlert("Ошибка при смене цены"); }
+            } catch(e) { showNotification("Ошибка при смене цены", "error"); }
         }
 
         async function requestWithdraw() {
@@ -392,11 +414,11 @@
             
             const available = parseFloat(document.getElementById('avail-balance').innerText);
             
-            if (isNaN(amount) || amount <= 0) return tg.showAlert("Введите корректную сумму!");
-            if (amount > available) return tg.showAlert("У вас недостаточно доступных средств!");
+            if (isNaN(amount) || amount <= 0) return showNotification("Введите корректную сумму!", "error");
+            if (amount > available) return showNotification("У вас недостаточно доступных средств!", "error");
 
             const wallet = prompt("Введите ваш TON адрес кошелька для выплаты:");
-            if (!wallet || wallet.trim().length < 40) return tg.showAlert("Введите корректный TON адрес!");
+            if (!wallet || wallet.trim().length < 40) return showNotification("Введите корректный TON адрес!", "error");
 
             try {
                 const res = await fetch(`${API_URL}/withdraw`, {
@@ -405,14 +427,14 @@
                 });
 
                 if (res.ok) {
-                    tg.showAlert(`✅ Заявка на вывод ${amount} TON успешно создана!\nАдминистратор обработает её в ближайшее время.`);
+                    showNotification(`✅ Заявка на вывод ${amount} TON успешно создана!\nОжидайте.`, "success");
                     fetchUserData();
                 } else {
                     const data = await res.json();
-                    tg.showAlert(data.detail || "Ошибка при создании заявки");
+                    showNotification(data.detail || "Ошибка при создании заявки", "error");
                 }
             } catch (e) {
-                tg.showAlert("Ошибка связи с сервером");
+                showNotification("Ошибка связи с сервером", "error");
             }
         }
 
@@ -430,7 +452,7 @@
             const tag = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
             
-            if (!tag || !price) return tg.showAlert("Заполните все поля!");
+            if (!tag || !price) return showNotification("Заполните все поля!", "error");
             
             document.getElementById('confirm-tag').innerText = tag;
             document.getElementById('confirm-price').innerText = price;
@@ -457,10 +479,10 @@
                     document.getElementById('modal-step-2').style.display = 'block';
                     startTimer(data.lot_id); 
                 } else {
-                    tg.showAlert(data.detail || "Ошибка сервера");
+                    showNotification(data.detail || "Ошибка сервера", "error");
                     closeModal();
                 }
-            } catch (e) { tg.showAlert("Ошибка связи с сервером"); }
+            } catch (e) { showNotification("Ошибка связи с сервером", "error"); }
         }
 
         function startTimer(lotId) {
@@ -480,7 +502,7 @@
                     clearInterval(timerInterval);
                     clearInterval(statusInterval);
                     closeModal();
-                    tg.showAlert("Время вышло! Если вы не передали права, лот отменен.");
+                    showNotification("Время вышло! Если вы не передали права, лот отменен.", "error");
                 }
             }, 1000);
 
@@ -517,6 +539,7 @@
             let internalBalance = availElement ? parseFloat(availElement.innerText) : 0;
 
             if (internalBalance >= price) {
+                // Пока оставляем confirm (системное окно да/нет), так как оно требует выбора пользователя
                 if (confirm(`У вас на балансе ${internalBalance} TON.\nСписать ${price} TON для покупки этого лота?`)) {
                     try {
                         const res = await fetch(`${API_URL}/lots/${lotId}/buy-internal`, {
@@ -525,19 +548,19 @@
                         const data = await res.json();
                         
                         if (res.ok) {
-                            tg.showAlert("✅ Лот успешно куплен с вашего внутреннего баланса!");
+                            showNotification("✅ Лот успешно куплен с вашего внутреннего баланса!", "success");
                             fetchLots();
                             fetchUserData();
                         } else {
-                            tg.showAlert(data.detail || "Ошибка при покупке");
+                            showNotification(data.detail || "Ошибка при покупке", "error");
                         }
-                    } catch(e) { tg.showAlert("Ошибка сервера"); }
+                    } catch(e) { showNotification("Ошибка сервера", "error"); }
                     
                     return; 
                 }
             }
 
-            if (!tonConnectUI.connected) return tg.showAlert("Сначала подключите кошелек!");
+            if (!tonConnectUI.connected) return showNotification("Сначала подключите кошелек!", "warning");
 
             const comment = `buy_lot_${lotId}`;
             const cell = new TonWeb.boc.Cell();
@@ -557,11 +580,11 @@
 
             try {
                 await tonConnectUI.sendTransaction(transaction);
-                tg.showAlert("Транзакция отправлена! Ждем подтверждения сети...");
+                showNotification("Транзакция отправлена! Ждем подтверждения сети...", "info");
                 await fetch(`${API_URL}/lots/${lotId}/verify-payment`, {
                     method: 'POST', headers, body: JSON.stringify({ boc: "sent", buyer_id: user.id })
                 });
-            } catch (e) { tg.showAlert("Оплата отменена"); }
+            } catch (e) { showNotification("Оплата отменена", "error"); }
         }
 
         // ЗАПУСК ПРИЛОЖЕНИЯ
