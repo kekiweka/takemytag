@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeMyTag Premium</title>
+    <title>TakeMyTag Premium Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
@@ -13,57 +13,130 @@
             --accent-color: #38bdf8;
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
+            --success: #10b981;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: radial-gradient(circle at top right, #1e293b, #0f172a);
             color: var(--text-main);
-            margin: 0; padding: 16px; min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        #ton-connect-button { display: flex; justify-content: center; margin-bottom: 20px; }
+        /* Кнопка TonConnect */
+        #ton-connect-button {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
 
         .balance-card {
-            background: var(--card-bg); backdrop-filter: blur(10px);
-            padding: 24px; border-radius: 20px; text-align: center;
-            border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
         }
 
-        .input-box { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+        .balance-label { color: var(--text-dim); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .balance-value { font-size: 28px; font-weight: 800; color: var(--accent-color); margin-top: 5px; }
+
+        .input-box {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
         input {
-            width: 100%; padding: 12px; margin-bottom: 12px;
-            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; color: white; box-sizing: border-box; outline: none;
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
         }
         input:focus { border-color: var(--accent-color); }
 
         .btn-main {
             background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            color: white; border: none; padding: 16px; border-radius: 12px;
-            width: 100%; font-weight: 700; cursor: pointer;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
 
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-left: 5px; }
+
         .lot-item {
-            background: var(--card-bg); padding: 16px; border-radius: 12px;
-            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .buy-btn {
-            background: #10b981; color: white; border: none;
-            padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        /* Modal Styles */
+        /* Модальное окно */
         #custom-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-            z-index: 1000; justify-content: center; align-items: center;
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
-        .modal-content { background: #1e293b; padding: 24px; border-radius: 24px; width: 85%; max-width: 400px; text-align: center; }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 28px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
         .step-num {
-            background: var(--accent-color); color: white; width: 25px; height: 25px;
-            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px;
+            background: var(--accent-color);
+            color: white;
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -72,31 +145,34 @@
     <div id="ton-connect-button"></div>
 
     <div class="balance-card">
-        <div style="color: var(--text-dim); font-size: 14px; margin-bottom: 4px;">Статус кошелька</div>
-        <div id="wallet-status" style="font-weight: bold; color: var(--accent-color);">Загрузка...</div>
+        <div class="balance-label">Статус кошелька</div>
+        <div id="wallet-status" class="balance-value" style="font-size: 20px;">Загрузка...</div>
     </div>
 
     <div class="input-box">
-        <div style="margin-bottom: 12px; font-weight: bold;">💎 Выставить юзернейм</div>
-        <input type="text" id="username-input" placeholder="Например: my_tag">
+        <div class="section-title" style="margin-top: 0;">💎 Продать юзернейм</div>
+        <input type="text" id="username-input" placeholder="Например: tag_name">
         <input type="number" id="price-input" placeholder="Цена в TON">
         <button class="btn-main" onclick="openConfirmModal()">Выставить на маркет</button>
     </div>
 
-    <div style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">🔥 Витрина тегов</div>
-    <div id="lots-container"></div>
+    <div class="section-title">🔥 Активные предложения</div>
+    <div id="lots-container">
+        </div>
 
     <div id="custom-modal">
         <div class="modal-content">
-            <h2 style="margin-top:0">Почти готово!</h2>
-            <div style="text-align:left; font-size: 14px; line-height: 1.5;">
-                <p><span class="step-num">1</span> Проверьте цену: <b id="confirm-price">0</b> TON</p>
-                <p><span class="step-num">2</span> После подтверждения передайте права владельца канала <b>@<span id="confirm-tag"></span></b> нашему аккаунту:</p>
-                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center; font-weight:bold; color:#38bdf8;">@nezemnayazaya</div>
-                <p style="font-size:11px; color:var(--text-dim); margin-top:10px;">Бот автоматически активирует лот, когда увидит права владельца.</p>
+            <h2 style="margin-top:0; font-size: 22px;">Почти готово!</h2>
+            <div style="text-align:left; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+                <p><span class="step-num">1</span> Цена лота: <b id="confirm-price" style="color:white">0</b> TON</p>
+                <p><span class="step-num">2</span> Передайте права владельца канала <b>@<span id="confirm-tag" style="color:white"></span></b> аккаунту:</p>
+                <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; text-align:center; font-weight:bold; color:#38bdf8; font-size: 16px; border: 1px dashed #38bdf8;">
+                    @nezemnayazaya
+                </div>
+                <p style="font-size:11px; color:var(--text-dim); margin-top:12px;">🛡️ Юзербот автоматически выставит лот на витрину, как только получит права.</p>
             </div>
-            <button class="btn-main" onclick="confirmAndSend()" style="margin-top: 20px;">Подтверждаю</button>
-            <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer;">Отмена</button>
+            <button class="btn-main" onclick="confirmAndSend()" style="margin-top: 25px;">Подтверждаю</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px;">Отмена</button>
         </div>
     </div>
 
@@ -108,62 +184,80 @@
         const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
         const user = tg.initDataUnsafe.user;
 
-        // TonConnect Init
+        // Инициализация TonConnect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://takemytag.vercel.app/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
+        // Отслеживание статуса кошелька
         tonConnectUI.onStatusChange(wallet => {
             document.getElementById('wallet-status').innerText = wallet ? "Подключен ✅" : "Не подключен ❌";
         });
 
+        // 1. ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ (Критически важно для создания в БД)
+        async function fetchUserData() {
+            if (!user) return;
+            try {
+                await fetch(`${API_URL}/users/${user.id}`, { headers });
+                console.log("User synced with DB");
+            } catch (e) { console.error("DB Sync Error", e); }
+        }
+
+        // 2. ЗАГРУЗКА ЛОТОВ
         async function fetchLots() {
             try {
                 const res = await fetch(`${API_URL}/lots`, { headers });
                 const lots = await res.json();
                 const container = document.getElementById('lots-container');
+                
+                if (lots.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--text-dim);margin-top:20px;">Пока нет активных лотов</div>';
+                    return;
+                }
+
                 container.innerHTML = lots.map(lot => `
                     <div class="lot-item">
                         <div>
-                            <div style="font-weight:600;">@${lot.target_username}</div>
-                            <div style="color:var(--text-dim); font-size:12px;">${lot.price} TON</div>
+                            <div style="font-weight:700; font-size:16px;">@${lot.target_username}</div>
+                            <div style="color:var(--accent-color); font-weight:600; font-size:14px;">${lot.price} TON</div>
                         </div>
                         <button class="buy-btn" onclick="buyLotWithWallet(${lot.id}, ${lot.price})">Купить</button>
                     </div>
-                `).join('') || '<div style="text-align:center;color:var(--text-dim);">Активных лотов пока нет</div>';
-            } catch (e) {}
+                `).join('');
+            } catch (e) { console.error("Fetch Lots Error", e); }
         }
 
-        // Logic for Buying
+        // 3. ПОКУПКА ЧЕРЕЗ КОШЕЛЕК
         async function buyLotWithWallet(lotId, price) {
-            if (!tonConnectUI.connected) return tg.showAlert("Подключите кошелек!");
+            if (!tonConnectUI.connected) return tg.showAlert("Сначала подключите кошелек!");
 
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 360,
                 messages: [{
-                    address: "UQDKJrZT85ZyMPVkc0d2Q3kPIzOb4YEmJSb-oVtAZE-71AaU", // 🚨 ЗАМЕНИ НА СВОЙ!
+                    address: "UQDKJrZT85ZyMPVkc0d2Q3kPIzOb4YEmJSb-oVtAZE-71AaU", // 🚨 ВСТАВЬ СВОЙ АДРЕС СЮДА!
                     amount: (price * 1000000000).toString()
                 }]
             };
 
             try {
                 await tonConnectUI.sendTransaction(transaction);
-                tg.showAlert("Оплата отправлена! Проверяем транзакцию...");
-                // Сообщаем бэкенду
+                tg.showAlert("Транзакция отправлена! Проверяем оплату...");
+                
                 await fetch(`${API_URL}/lots/${lotId}/verify-payment`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({ boc: "sent", buyer_id: user.id })
                 });
-            } catch (e) { tg.showAlert("Ошибка оплаты"); }
+            } catch (e) { tg.showAlert("Оплата отменена"); }
         }
 
-        // Logic for Selling
+        // 4. ЛОГИКА ВЫСТАВЛЕНИЯ НА ПРОДАЖУ
         function openConfirmModal() {
-            const tag = document.getElementById('username-input').value.replace('@', '');
+            const tag = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
-            if (!tag || !price) return tg.showAlert("Заполните поля!");
+            
+            if (!tag || !price) return tg.showAlert("Заполните все поля!");
             
             document.getElementById('confirm-tag').innerText = tag;
             document.getElementById('confirm-price').innerText = price;
@@ -178,22 +272,33 @@
                 const res = await fetch(`${API_URL}/lots`, {
                     method: 'POST',
                     headers,
-                    body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price) })
+                    body: JSON.stringify({ 
+                        user_id: user.id, 
+                        target_username: tag, 
+                        price: parseFloat(price) 
+                    })
                 });
+
                 if (res.ok) {
-                    tg.showAlert("Лот создан! Теперь передайте права на @nezemnayazaya");
+                    tg.showAlert("✅ Лот создан! Передайте права на @nezemnayazaya для активации.");
                     closeModal();
                     fetchLots();
                 } else {
-                    const err = await res.json();
-                    tg.showAlert(err.detail || "Ошибка");
+                    const data = await res.json();
+                    tg.showAlert(data.detail || "Ошибка сервера");
                 }
-            } catch (e) { tg.showAlert("Ошибка сервера"); }
+            } catch (e) { tg.showAlert("Ошибка связи с сервером"); }
         }
 
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
 
-        if (user) fetchLots();
+        // ЗАПУСК ПРИЛОЖЕНИЯ
+        if (user) {
+            fetchUserData(); // Регистрируем юзера в базе
+            fetchLots();     // Грузим лоты
+        }
+
+        // Обновление раз в 15 секунд
         setInterval(fetchLots, 15000);
     </script>
 </body>
