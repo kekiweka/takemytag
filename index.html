@@ -386,8 +386,42 @@
             } catch(e) { tg.showAlert("Ошибка при смене цены"); }
         }
 
-        function requestWithdraw() {
-            tg.showAlert("Вывод средств пока в разработке. Мы подключим его на Этапе 2!");
+        async function requestWithdraw() {
+            // 1. Спрашиваем сумму
+            const amountStr = prompt(`Сколько TON вы хотите вывести?\nДоступно: ${document.getElementById('avail-balance').innerText}`);
+            if (!amountStr) return;
+            const amount = parseFloat(amountStr);
+            
+            // Получаем доступный баланс в виде числа для проверки
+            const available = parseFloat(document.getElementById('avail-balance').innerText);
+            
+            // 2. Проверяем правильность суммы
+            if (isNaN(amount) || amount <= 0) return tg.showAlert("Введите корректную сумму!");
+            if (amount > available) return tg.showAlert("У вас недостаточно доступных средств!");
+
+            // 3. Спрашиваем адрес кошелька
+            const wallet = prompt("Введите ваш TON адрес кошелька для выплаты:");
+            if (!wallet || wallet.trim().length < 40) return tg.showAlert("Введите корректный TON адрес!");
+
+            // 4. Отправляем заявку на бэкенд
+            try {
+                const res = await fetch(`${API_URL}/withdraw`, {
+                    method: 'POST', 
+                    headers, 
+                    body: JSON.stringify({ user_id: user.id, amount: amount, wallet_address: wallet.trim() })
+                });
+
+                if (res.ok) {
+                    tg.showAlert(`✅ Заявка на вывод ${amount} TON успешно создана!\nАдминистратор обработает её в ближайшее время.`);
+                    // Сразу обновляем профиль, чтобы юзер увидел, что баланс списался в обработку
+                    fetchUserData();
+                } else {
+                    const data = await res.json();
+                    tg.showAlert(data.detail || "Ошибка при создании заявки");
+                }
+            } catch (e) {
+                tg.showAlert("Ошибка связи с сервером");
+            }
         }
 
         // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
