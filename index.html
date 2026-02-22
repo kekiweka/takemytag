@@ -207,6 +207,10 @@
             padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; 
             font-family: 'Montserrat', sans-serif; font-weight: 600; 
         }
+
+        /* 💡 НОВОЕ: Скролл для истории транзакций */
+        .history-container::-webkit-scrollbar { width: 4px; }
+        .history-container::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -268,7 +272,10 @@
                 </div>
             </div>
             
-            <button class="btn-main btn-small" style="background: #334155; width: 100%;" onclick="openWithdrawModal()">💸 Запросить вывод</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-main btn-small" style="background: #334155; flex: 1;" onclick="openWithdrawModal()">💸 Вывод</button>
+                <button class="btn-main btn-small" style="background: #334155; flex: 1;" onclick="openHistoryModal()">📜 История</button>
+            </div>
         </div>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
@@ -334,6 +341,9 @@
     </div>
 
     <script>
+        // 💡 ВАЖНО: ТВОЙ БОТ (Без символа @)
+        const BOT_USERNAME = "TakeMyTag_bot"; 
+
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -344,7 +354,6 @@
         let timerInterval;
         let statusInterval;
 
-        // --- УВЕДОМЛЕНИЯ ---
         function showNotification(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -358,7 +367,6 @@
             }, 3000);
         }
 
-        // --- УПРАВЛЕНИЕ КАСТОМНЫМИ МОДАЛКАМИ ---
         function showActionModal(html) {
             document.getElementById('action-modal-body').innerHTML = html;
             document.getElementById('action-modal').style.display = 'flex';
@@ -368,7 +376,6 @@
             document.getElementById('action-modal').style.display = 'none'; 
         }
 
-        // --- ЛОГИКА АНИМАЦИИ ЗАГРУЗКИ ---
         document.addEventListener("DOMContentLoaded", () => {
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
@@ -392,7 +399,6 @@
             }, 40);
         });
 
-        // --- ИНИЦИАЛИЗАЦИЯ TON CONNECT ---
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ 
             manifestUrl: 'https://takemytag.vercel.app/tonconnect-manifest.json', 
             buttonRootId: 'ton-connect-button' 
@@ -402,7 +408,6 @@
             document.getElementById('wallet-status').innerText = wallet ? "Подключен ✅" : "Не подключен ❌";
         });
 
-        // --- ЗАГРУЗКА ДАННЫХ ---
         async function fetchUserData() {
             if (!user) return;
             try {
@@ -420,10 +425,33 @@
                 const res = await fetch(`${API_URL}/lots`, { headers });
                 allLots = await res.json();
                 renderMarket();
+                checkStartParam(); // 💡 Вызов функции проверки ссылок
             } catch (e) { }
         }
 
-        // --- РЕНДЕРИНГ МАРКЕТА ---
+        // 💡 ЛОГИКА DEEP-LINKS (Открытие нужного лота по ссылке)
+        let startParamProcessed = false;
+        function checkStartParam() {
+            if (startParamProcessed) return;
+            const startParam = tg.initDataUnsafe?.start_param;
+            if (startParam && startParam.startsWith('lot_')) {
+                const targetLotId = parseInt(startParam.replace('lot_', ''));
+                const targetLot = allLots.find(l => l.id === targetLotId);
+                if (targetLot) {
+                    openBuyModal(targetLot.id, targetLot.price, targetLot.target_username);
+                    startParamProcessed = true;
+                }
+            }
+        }
+
+        // 💡 ФУНКЦИЯ ДЛЯ ГЕНЕРАЦИИ И ОТПРАВКИ ССЫЛКИ "ПОДЕЛИТЬСЯ"
+        function shareLot(lotId, tag, price) {
+            const shareUrl = `https://t.me/${BOT_USERNAME}/app?startapp=lot_${lotId}`;
+            const text = `🔥 Продается красивый юзернейм @${tag} всего за ${price} TON! Успей забрать!`;
+            const tgShareLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
+            tg.openTelegramLink(tgShareLink);
+        }
+
         function renderMarket() {
             const filter = document.getElementById('filter-select').value;
             let sorted = [...allLots];
@@ -445,19 +473,20 @@
                         <div style="font-weight:700; font-size:16px;">@${lot.target_username}</div>
                         <div style="color:var(--accent-color); font-weight:600; font-size:14px;">${lot.price} TON</div>
                     </div>
-                    <button class="buy-btn" onclick="openBuyModal(${lot.id}, ${lot.price})">Купить</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="buy-btn" style="background:#334155; padding: 10px 14px;" onclick="shareLot(${lot.id}, '${lot.target_username}', ${lot.price})">🔗</button>
+                        <button class="buy-btn" onclick="openBuyModal(${lot.id}, ${lot.price}, '${lot.target_username}')">Купить</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // --- РЕНДЕРИНГ ПРОФИЛЯ ---
         async function renderProfile() {
             if(!user) return;
             try {
                 const res = await fetch(`${API_URL}/users/${user.id}/lots`, {headers});
                 let myLots = await res.json();
                 
-                // 💡 ИСПРАВЛЕНИЕ: Чтение фильтра и сортировка лотов
                 const filter = document.getElementById('profile-filter-select').value;
                 
                 if (filter === 'active') myLots = myLots.filter(l => l.status === 'active' || l.status === 'pending_holder');
@@ -465,7 +494,7 @@
                 if (filter === 'closed') myLots = myLots.filter(l => l.status === 'closed' || l.status === 'pending_return');
                 
                 if (filter === 'old') myLots.sort((a,b) => a.id - b.id);
-                else myLots.sort((a,b) => b.id - a.id); // По умолчанию "Новые"
+                else myLots.sort((a,b) => b.id - a.id);
 
                 const container = document.getElementById('profile-list');
                 
@@ -475,7 +504,6 @@
                 }
 
                 container.innerHTML = myLots.map(lot => {
-                    // Красивые статусы с разными цветами
                     let statusText = '';
                     let statusColor = 'var(--text-dim)';
                     
@@ -489,7 +517,6 @@
                     
                     const getAmount = (lot.price * 0.98).toFixed(2);
                     
-                    // 💡 ИСПРАВЛЕНИЕ: Кнопки показываются ТОЛЬКО если лот не продан и не отменен
                     let actionButtons = '';
                     if (lot.status === 'active' || lot.status === 'pending_holder') {
                         actionButtons = `
@@ -516,7 +543,56 @@
             } catch (e) { }
         }
 
-        // --- МОДАЛКА: СМЕНА ЦЕНЫ ---
+        // 💡 НОВОЕ: Окно Истории Транзакций
+        async function openHistoryModal() {
+            showActionModal(`<h3>Загрузка...</h3>`);
+            try {
+                const res = await fetch(`${API_URL}/users/${user.id}/transactions`, { headers });
+                const txs = await res.json();
+                
+                if (txs.length === 0) {
+                    showActionModal(`
+                        <h3 style="margin-top:0;">📜 История операций</h3>
+                        <p style="color:var(--text-dim);">У вас пока нет транзакций.</p>
+                        <button class="btn-main" onclick="closeActionModal()">Закрыть</button>
+                    `);
+                    return;
+                }
+
+                const txHtml = txs.map(t => {
+                    let color = t.amount > 0 ? 'var(--success)' : 'var(--error)';
+                    let sign = t.amount > 0 ? '+' : '';
+                    let typeName = t.type === 'deposit' ? 'Пополнение' : 
+                                   t.type === 'withdrawal' ? 'Вывод / Покупка' : 
+                                   t.type === 'sale_income' ? 'Продажа лота' : 
+                                   t.type === 'commission_fee' ? 'Комиссия системы' : t.type;
+                    let statusIcon = t.status === 'completed' ? '✅' : t.status === 'pending' ? '⏳' : '❌';
+                    
+                    return `
+                    <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
+                        <div>
+                            <div style="font-weight:600; font-size:13px; margin-bottom:4px;">${statusIcon} ${typeName}</div>
+                            <div style="color:var(--text-dim); font-size:11px;">${t.date}</div>
+                        </div>
+                        <div style="color:${color}; font-weight:800; font-size:15px;">
+                            ${sign}${t.amount} TON
+                        </div>
+                    </div>`;
+                }).join('');
+
+                showActionModal(`
+                    <h3 style="margin-top:0; margin-bottom:15px;">📜 История операций</h3>
+                    <div class="history-container" style="max-height:55vh; overflow-y:auto; padding-right:5px; margin-bottom:15px;">
+                        ${txHtml}
+                    </div>
+                    <button class="btn-main" onclick="closeActionModal()">Закрыть</button>
+                `);
+            } catch (e) {
+                showNotification("Ошибка загрузки истории", "error");
+                closeActionModal();
+            }
+        }
+
         function openPriceModal(lotId, tag) {
             showActionModal(`
                 <h3 style="margin-top:0;">Новая цена для @${tag}</h3>
@@ -541,7 +617,6 @@
             } catch(e) { showNotification("Ошибка сервера", "error"); }
         }
 
-        // --- МОДАЛКА: ВОЗВРАТ КАНАЛА ---
         function openRecallModal(lotId, tag) {
             showActionModal(`
                 <h3 style="margin-top:0;">Вернуть канал @${tag}?</h3>
@@ -558,7 +633,7 @@
             try {
                 const res = await fetch(`${API_URL}/lots/${lotId}/recall`, { method: 'POST', headers });
                 if(res.ok) { 
-                    showNotification("🔄 Запрос на возврат отправлен! Бот скоро отдаст вам права.", "success"); 
+                    showNotification("🔄 Запрос на возврат отправлен!", "success"); 
                     renderProfile(); 
                     fetchLots(); 
                 } else {
@@ -567,7 +642,6 @@
             } catch(e) { showNotification("Ошибка связи с сервером", "error"); }
         }
 
-        // --- МОДАЛКА: ЗАПРОС НА ВЫВОД ---
         function openWithdrawModal() {
             const avail = document.getElementById('avail-balance').innerText;
             showActionModal(`
@@ -599,7 +673,7 @@
                 });
                 
                 if (res.ok) { 
-                    showNotification(`✅ Заявка на вывод ${amount} TON успешно создана!`, "success"); 
+                    showNotification(`✅ Заявка на вывод успешно создана!`, "success"); 
                     fetchUserData(); 
                 } else {
                     showNotification("Ошибка при создании заявки", "error");
@@ -607,13 +681,12 @@
             } catch (e) { showNotification("Ошибка сервера", "error"); }
         }
 
-        // --- МОДАЛКА: ПОКУПКА ---
-        function openBuyModal(lotId, price) {
+        function openBuyModal(lotId, price, tag = "тег") {
             let internal = parseFloat(document.getElementById('avail-balance')?.innerText || "0");
             
             if (internal >= price) {
                 showActionModal(`
-                    <h3 style="margin-top:0;">Оплата с баланса</h3>
+                    <h3 style="margin-top:0;">Покупка @${tag}</h3>
                     <p style="font-size:14px; color:var(--text-dim);">У вас на балансе ${internal} TON.<br>Списать <b>${price} TON</b> за этот лот?</p>
                     <div class="flex-btns">
                         <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
@@ -631,7 +704,7 @@
             try {
                 const res = await fetch(`${API_URL}/lots/${lotId}/buy-internal`, { method: 'POST', headers, body: JSON.stringify({ buyer_id: user.id }) });
                 if (res.ok) { 
-                    showNotification("✅ Лот успешно куплен с вашего внутреннего баланса!", "success"); 
+                    showNotification("✅ Лот успешно куплен!", "success"); 
                     fetchLots(); 
                     fetchUserData(); 
                 } else { 
@@ -663,7 +736,6 @@
             } catch (e) { showNotification("Оплата отменена", "error"); }
         }
 
-        // --- НАВИГАЦИЯ ПО ВКЛАДКАМ ---
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -674,7 +746,6 @@
             if(tabId === 'market') fetchLots();
         }
 
-        // --- ВЫСТАВЛЕНИЕ НОВОГО ЛОТА ---
         function openConfirmModal() {
             const tag = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
@@ -712,7 +783,6 @@
             } catch (e) { showNotification("Ошибка связи с сервером", "error"); }
         }
 
-        // --- ТАЙМЕРЫ ---
         function startTimer(lotId) {
             clearInterval(timerInterval); 
             clearInterval(statusInterval);
@@ -761,7 +831,6 @@
             if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); 
         }
 
-        // --- СТАРТ ---
         if (user) { 
             fetchUserData(); 
             fetchLots(); 
