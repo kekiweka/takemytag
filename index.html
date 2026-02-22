@@ -238,6 +238,7 @@
             <div class="section-title" style="margin-top: 0;">💎 Продать юзернейм</div>
             <input type="text" id="username-input" placeholder="Например: tag_name">
             <input type="number" id="price-input" placeholder="Цена в TON">
+            <div id="price-calc-hint" style="color: var(--warning); font-size: 13px; margin-top: -5px; margin-bottom: 12px; display: none; text-align: right; font-weight: 600;"></div>
             <button class="btn-main" onclick="openConfirmModal()">Выставить на маркет</button>
         </div>
         
@@ -295,7 +296,7 @@
         <div class="input-box" style="line-height: 1.6; color: var(--text-dim);">
             <h2 style="color: white; margin-top: 0;">ℹ️ Информация</h2>
             <p><b>Как продать юзернейм?</b><br>1. Введите тег и цену в разделе Маркет.<br>2. Нажмите "Выставить".<br>3. Передайте права владельца нашему боту <b>@TakeMyTag1</b> в течение 5 минут.</p>
-            <p><b>Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">2%</b> от суммы сделки.</p>
+            <p><b>Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">3.5%</b> от суммы сделки.</p>
             <p><b>Заморозка (Холд):</b><br>После покупки средства замораживаются на 1 час для безопасности сделки, после чего поступают на ваш доступный баланс.</p>
         </div>
     </div>
@@ -350,6 +351,29 @@
         let allLots = [];
         let timerInterval;
         let statusInterval;
+
+        // 💡 Логика динамического расчета суммы при вводе цены
+        document.getElementById('price-input').addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            const hint = document.getElementById('price-calc-hint');
+            if (!isNaN(val) && val > 0) {
+                hint.innerHTML = `Вы получите: ${(val * 0.965).toFixed(2)} TON <span style="color:var(--text-dim);font-size:11px;">(-3.5%)</span>`;
+                hint.style.display = 'block';
+            } else {
+                hint.style.display = 'none';
+            }
+        });
+
+        window.updateModalPriceHint = function(val) {
+            const num = parseFloat(val);
+            const hint = document.getElementById('modal-price-calc-hint');
+            if(!isNaN(num) && num > 0) {
+                hint.innerHTML = `Вы получите: ${(num * 0.965).toFixed(2)} TON <span style="color:var(--text-dim);font-size:11px;">(-3.5%)</span>`;
+                hint.style.display = 'block';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
 
         function showNotification(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -423,7 +447,6 @@
             } catch (e) { }
         }
 
-        // 💡 НОВОЕ: КРАСИВОЕ ПРЕВЬЮ ЛОТА ИЗ ССЫЛКИ
         function openPreviewModal(lotId, tag, price) {
             showActionModal(`
                 <div style="text-align: center;">
@@ -449,7 +472,6 @@
             `);
         }
 
-        // 💡 ИЗМЕНЕНО: Теперь ссылка открывает Превью, а не само пополнение
         let startParamProcessed = false;
         function checkStartParam() {
             if (startParamProcessed) return;
@@ -534,7 +556,7 @@
                     else if (lot.status === 'closed') { statusText = '⚪ Отменен / Забран'; }
                     else { statusText = '⚪ ' + lot.status; }
                     
-                    const getAmount = (lot.price * 0.98).toFixed(2);
+                    const getAmount = (lot.price * 0.965).toFixed(2);
                     
                     let actionButtons = '';
                     if (lot.status === 'active' || lot.status === 'pending_holder') {
@@ -554,7 +576,7 @@
                         </div>
                         <div style="font-size:14px; color: #cbd5e1;">
                             Цена: <b>${lot.price} TON</b><br>
-                            После холда (-2%): <b style="color:var(--warning);">${getAmount} TON</b>
+                            После холда (-3.5%): <b style="color:var(--warning);">${getAmount} TON</b>
                         </div>
                         ${actionButtons}
                     </div>`
@@ -614,7 +636,8 @@
         function openPriceModal(lotId, tag) {
             showActionModal(`
                 <h3 style="margin-top:0;">Новая цена для @${tag}</h3>
-                <input type="number" id="new-price-input" placeholder="Введите цену в TON">
+                <input type="number" id="new-price-input" placeholder="Введите цену в TON" oninput="window.updateModalPriceHint(this.value)">
+                <div id="modal-price-calc-hint" style="color: var(--warning); font-size: 13px; margin-top: -5px; margin-bottom: 12px; display: none; text-align: right; font-weight: 600;"></div>
                 <div class="flex-btns">
                     <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
                     <button class="btn-confirm" onclick="submitPriceChange(${lotId})">Сохранить</button>
