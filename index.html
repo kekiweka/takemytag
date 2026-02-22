@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TakeMyTag Premium Market</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
@@ -22,7 +23,6 @@
             --error: #ef4444;
         }
 
-        /* --- ПРИМЕНЯЕМ НОВЫЙ ШРИФТ КО ВСЕМУ ПРИЛОЖЕНИЮ --- */
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-color);
@@ -39,7 +39,6 @@
             overflow-x: hidden;
         }
 
-        /* --- ВСТРОЕННЫЕ УВЕДОМЛЕНИЯ (ТОСТЫ) --- */
         #toast-container {
             position: fixed;
             top: 15px;
@@ -51,7 +50,7 @@
             gap: 10px;
             width: 90%;
             max-width: 400px;
-            pointer-events: none; /* Чтобы клики проходили сквозь них */
+            pointer-events: none;
         }
 
         .custom-toast {
@@ -75,13 +74,12 @@
 
         .custom-toast.error { border-left-color: var(--error); }
         .custom-toast.success { border-left-color: var(--success); }
+        .custom-toast.warning { border-left-color: var(--warning); }
         .custom-toast.fade-out { animation: fadeOut 0.3s ease-in forwards; }
 
         @keyframes slideDown { to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
 
-
-        /* --- ЗАГРУЗОЧНЫЙ ЭКРАН (LOADER) --- */
         #loader {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -109,48 +107,121 @@
             100% { transform: scale(0.95); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
         }
 
-        .loader-title { font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #0ea5e9, #f8fafc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 25px; letter-spacing: 1px; }
+        .loader-title { 
+            font-size: 26px; font-weight: 800; 
+            background: linear-gradient(135deg, #0ea5e9, #f8fafc); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 25px; letter-spacing: 1px; 
+        }
+
         .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; }
         .loader-bar { height: 100%; width: 0%; background: var(--accent-color); border-radius: 10px; box-shadow: 0 0 10px var(--accent-color); transition: width 0.1s linear; }
         .loader-percent { margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
 
-        /* --- ОСТАЛЬНЫЕ СТИЛИ --- */
         #ton-connect-button { display: flex; justify-content: center; margin-bottom: 20px; }
-        .balance-card { background: var(--card-bg); backdrop-filter: blur(12px); padding: 20px; border-radius: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+        
+        .balance-card { 
+            background: var(--card-bg); backdrop-filter: blur(12px); 
+            padding: 20px; border-radius: 24px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; 
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); 
+        }
+        
         .balance-label { color: var(--text-dim); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
         .balance-value { font-size: 28px; font-weight: 800; color: var(--accent-color); margin-top: 5px; }
-        .input-box { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); }
-        input, select { width: 100%; padding: 14px; margin-bottom: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-family: 'Montserrat', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        
+        .input-box { 
+            background: var(--card-bg); border-radius: 20px; 
+            padding: 20px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        input, select { 
+            width: 100%; padding: 14px; margin-bottom: 12px; 
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; color: white; font-family: 'Montserrat', sans-serif; 
+            font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.3s; 
+        }
+        
         input:focus, select:focus { border-color: var(--accent-color); }
-        .btn-main { background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+        
+        .btn-main { 
+            background: linear-gradient(135deg, #0ea5e9, #2563eb); 
+            color: white; border: none; padding: 16px; border-radius: 14px; 
+            width: 100%; font-family: 'Montserrat', sans-serif; font-weight: 700; 
+            font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); 
+        }
+        
         .btn-small { padding: 10px; font-size: 13px; border-radius: 10px; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-left: 5px; }
-        .lot-item { background: var(--card-bg); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        
+        .lot-item { 
+            background: var(--card-bg); padding: 18px; border-radius: 16px; 
+            margin-bottom: 12px; display: flex; justify-content: space-between; 
+            align-items: center; border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
         .buy-btn { background: var(--success); color: white; font-family: 'Montserrat', sans-serif; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease; } 
         .tab-content.active { display: block; }
         @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
-        .nav-item { color: var(--text-dim); font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.3s; text-align: center; }
+        
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px); 
+            display: flex; justify-content: space-around; padding: 15px 0; 
+            border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; 
+        }
+        .nav-item { color: var(--text-dim); font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.3s; text-align: center; } 
         .nav-item.active { color: var(--accent-color); }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
-        #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1e293b; padding: 30px; border-radius: 28px; width: 85%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .step-num { background: var(--accent-color); color: white; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; font-weight: bold;}
+
+        .modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; 
+            height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); 
+            z-index: 1000; justify-content: center; align-items: center; 
+        }
+        .modal-content { 
+            background: #1e293b; padding: 30px; border-radius: 28px; 
+            width: 85%; max-width: 400px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        
+        .step-num { 
+            background: var(--accent-color); color: white; width: 26px; height: 26px; 
+            border-radius: 50%; display: inline-flex; align-items: center; 
+            justify-content: center; margin-right: 10px; font-size: 12px; font-weight: bold;
+        }
         .timer-text { font-size: 34px; font-weight: 800; color: #ef4444; margin: 15px 0; letter-spacing: 2px; }
+        
+        /* Кнопки в кастомных модалках */
+        .flex-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-cancel { 
+            background: transparent; border: 1px solid var(--text-dim); color: var(--text-main); 
+            padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; 
+            font-family: 'Montserrat', sans-serif; font-weight: 600; 
+        }
+        .btn-confirm { 
+            background: var(--accent-color); border: none; color: white; 
+            padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; 
+            font-family: 'Montserrat', sans-serif; font-weight: 600; 
+        }
     </style>
 </head>
 <body>
 
     <div id="toast-container"></div>
-
+    
     <div id="loader">
-        <img src="logo.jpg" alt="TakeMyTag Logo" class="loader-logo">
+        <img src="logo.jpg" alt="Logo" class="loader-logo">
         <div class="loader-title">TakeMyTag</div>
-        <div class="loader-bar-container">
-            <div class="loader-bar" id="loader-bar"></div>
-        </div>
+        <div class="loader-bar-container"><div class="loader-bar" id="loader-bar"></div></div>
         <div class="loader-percent"><span id="loader-percent">0</span>%</div>
+    </div>
+    
+    <div id="action-modal" class="modal-overlay" style="z-index: 10005;">
+        <div class="modal-content" id="action-modal-body"></div>
     </div>
 
     <div id="ton-connect-button"></div>
@@ -160,14 +231,14 @@
             <div class="balance-label">Статус кошелька</div>
             <div id="wallet-status" class="balance-value" style="font-size: 20px;">Загрузка...</div>
         </div>
-
+        
         <div class="input-box">
             <div class="section-title" style="margin-top: 0;">💎 Продать юзернейм</div>
             <input type="text" id="username-input" placeholder="Например: tag_name">
             <input type="number" id="price-input" placeholder="Цена в TON">
             <button class="btn-main" onclick="openConfirmModal()">Выставить на маркет</button>
         </div>
-
+        
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
             <div class="section-title" style="margin:0;">🔥 Витрина</div>
             <select id="filter-select" onchange="renderMarket()" style="width:140px; margin:0; padding:8px 12px; font-size: 13px;">
@@ -178,6 +249,7 @@
                 <option value="len_desc">Длинные теги</option>
             </select>
         </div>
+        
         <div id="lots-container"></div>
     </div>
 
@@ -196,8 +268,9 @@
                 </div>
             </div>
             
-            <button class="btn-main btn-small" style="background: #334155; width: 100%;" onclick="requestWithdraw()">💸 Запросить вывод</button>
+            <button class="btn-main btn-small" style="background: #334155; width: 100%;" onclick="openWithdrawModal()">💸 Запросить вывод</button>
         </div>
+        
         <div class="section-title">Мои выставленные лоты</div>
         <div id="profile-list"></div>
     </div>
@@ -206,7 +279,7 @@
         <div class="input-box" style="line-height: 1.6; color: var(--text-dim);">
             <h2 style="color: white; margin-top: 0;">ℹ️ Информация</h2>
             <p><b>Как продать юзернейм?</b><br>1. Введите тег и цену в разделе Маркет.<br>2. Нажмите "Выставить".<br>3. Передайте права владельца нашему боту <b>@TakeMyTag1</b> в течение 5 минут.</p>
-            <p><b>Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">2%</b> от суммы сделки для поддержания работы серверов.</p>
+            <p><b>Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">2%</b> от суммы сделки.</p>
             <p><b>Заморозка (Холд):</b><br>После покупки средства замораживаются на 1 час для безопасности сделки, после чего поступают на ваш доступный баланс.</p>
         </div>
     </div>
@@ -223,7 +296,7 @@
         </div>
     </div>
 
-    <div id="custom-modal">
+    <div id="custom-modal" class="modal-overlay">
         <div class="modal-content">
             
             <div id="modal-step-1">
@@ -234,29 +307,26 @@
                     <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; text-align:center; font-weight:bold; color:#38bdf8; font-size: 16px; border: 1px dashed #38bdf8;">
                         @TakeMyTag1
                     </div>
-                    <p style="font-size:11px; color:var(--text-dim); margin-top:12px;">🛡️ Юзербот автоматически выставит лот на витрину, как только получит права.</p>
+                    <p style="font-size:11px; color:var(--text-dim); margin-top:12px;">🛡️ Юзербот автоматически выставит лот на витрину.</p>
                 </div>
                 <button class="btn-main" onclick="confirmAndSend()" style="margin-top: 25px;">Выставить и начать таймер</button>
                 <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600;">Отмена</button>
             </div>
-
+            
             <div id="modal-step-2" style="display: none;">
                 <h2 style="margin-top:0; font-size: 20px;">Ожидаем права...</h2>
                 <p style="color: var(--text-dim); font-size: 14px;">Сделайте <b>@TakeMyTag1</b> владельцем канала.</p>
                 <div class="timer-text" id="countdown">05:00</div>
-                <p style="font-size: 12px; color: #ef4444;">Если время выйдет — лот будет отменен.</p>
                 <button class="btn-main btn-small" style="background: #475569; margin-top: 15px;" onclick="closeModal()">Свернуть окно</button>
             </div>
-
+            
             <div id="modal-step-3" style="display: none;">
                 <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
                 <h2 style="margin-top:0; font-size: 22px; color: #10b981;">Успешно выставлен!</h2>
-                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5;">
-                    Ваш юзернейм появился на витрине.<br><br>Мы уже отправили уведомление в бота и обязательно напишем, когда его купят!
-                </p>
+                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5;">Ваш юзернейм появился на витрине.<br><br>Мы уже отправили уведомление в бота!</p>
                 <button class="btn-main" style="margin-top: 15px;" onclick="closeModalAndRefresh()">Отлично</button>
             </div>
-
+            
         </div>
     </div>
 
@@ -271,7 +341,7 @@
         let timerInterval;
         let statusInterval;
 
-        // --- МАГИЯ УВЕДОМЛЕНИЙ (ЗАМЕНА tg.showAlert) ---
+        // --- УВЕДОМЛЕНИЯ ---
         function showNotification(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -279,29 +349,39 @@
             toast.innerHTML = message.replace(/\n/g, '<br>');
             container.appendChild(toast);
             
-            setTimeout(() => {
-                toast.classList.add('fade-out');
-                setTimeout(() => toast.remove(), 300);
+            setTimeout(() => { 
+                toast.classList.add('fade-out'); 
+                setTimeout(() => toast.remove(), 300); 
             }, 3000);
         }
 
-        // --- ЛОГИКА ЗАГРУЗОЧНОГО ЭКРАНА ---
+        // --- УПРАВЛЕНИЕ КАСТОМНЫМИ МОДАЛКАМИ ---
+        function showActionModal(html) {
+            document.getElementById('action-modal-body').innerHTML = html;
+            document.getElementById('action-modal').style.display = 'flex';
+        }
+        
+        function closeActionModal() { 
+            document.getElementById('action-modal').style.display = 'none'; 
+        }
+
+        // --- ЛОГИКА АНИМАЦИИ ЗАГРУЗКИ ---
         document.addEventListener("DOMContentLoaded", () => {
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
             const barEl = document.getElementById("loader-bar");
             const loader = document.getElementById("loader");
-
+            
             const interval = setInterval(() => {
                 percent += 2; 
                 if (percent >= 100) percent = 100;
                 
-                percentEl.innerText = percent;
+                percentEl.innerText = percent; 
                 barEl.style.width = percent + "%";
-
-                if (percent === 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
+                
+                if (percent === 100) { 
+                    clearInterval(interval); 
+                    setTimeout(() => { 
                         loader.style.opacity = "0"; 
                         setTimeout(() => loader.style.display = "none", 500); 
                     }, 300); 
@@ -309,15 +389,17 @@
             }, 40);
         });
 
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://takemytag.vercel.app/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-button'
+        // --- ИНИЦИАЛИЗАЦИЯ TON CONNECT ---
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ 
+            manifestUrl: 'https://takemytag.vercel.app/tonconnect-manifest.json', 
+            buttonRootId: 'ton-connect-button' 
         });
-
+        
         tonConnectUI.onStatusChange(wallet => {
             document.getElementById('wallet-status').innerText = wallet ? "Подключен ✅" : "Не подключен ❌";
         });
 
+        // --- ЗАГРУЗКА ДАННЫХ ---
         async function fetchUserData() {
             if (!user) return;
             try {
@@ -327,7 +409,7 @@
                 document.getElementById('profile-name').innerText = `Привет, ${user.first_name}!`;
                 document.getElementById('avail-balance').innerText = `${data.available_balance.toFixed(2)} TON`;
                 document.getElementById('froz-balance').innerText = `${data.frozen_balance.toFixed(2)} TON`;
-            } catch (e) { console.error("DB Sync Error", e); }
+            } catch (e) { }
         }
 
         async function fetchLots() {
@@ -335,9 +417,10 @@
                 const res = await fetch(`${API_URL}/lots`, { headers });
                 allLots = await res.json();
                 renderMarket();
-            } catch (e) {}
+            } catch (e) { }
         }
 
+        // --- РЕНДЕРИНГ МАРКЕТА ---
         function renderMarket() {
             const filter = document.getElementById('filter-select').value;
             let sorted = [...allLots];
@@ -359,106 +442,222 @@
                         <div style="font-weight:700; font-size:16px;">@${lot.target_username}</div>
                         <div style="color:var(--accent-color); font-weight:600; font-size:14px;">${lot.price} TON</div>
                     </div>
-                    <button class="buy-btn" onclick="buyLotWithWallet(${lot.id}, ${lot.price})">Купить</button>
+                    <button class="buy-btn" onclick="openBuyModal(${lot.id}, ${lot.price})">Купить</button>
                 </div>
             `).join('');
         }
 
+        // --- РЕНДЕРИНГ ПРОФИЛЯ ---
         async function renderProfile() {
             if(!user) return;
             try {
                 const res = await fetch(`${API_URL}/users/${user.id}/lots`, {headers});
                 const myLots = await res.json();
-                
                 const container = document.getElementById('profile-list');
+                
                 if(myLots.length === 0) {
                     container.innerHTML = '<div style="text-align:center;color:var(--text-dim);margin-top:20px;">У вас нет выставленных лотов</div>';
                     return;
                 }
 
                 container.innerHTML = myLots.map(lot => {
-                    const statusText = lot.status === 'active' ? '🟢 На витрине' : lot.status === 'pending_holder' ? '🟡 Ждет прав' : '⚪ ' + lot.status;
+                    const statusText = lot.status === 'active' ? '🟢 На витрине' : lot.status === 'pending_holder' ? '🟡 Ждет прав' : lot.status === 'pending_return' ? '🔄 Возвращаем...' : '⚪ ' + lot.status;
                     const getAmount = (lot.price * 0.98).toFixed(2);
                     
+                    // 💡 ВОТ ОНИ КНОПКИ ДЛЯ КАЖДОГО ЛОТА: "Изменить цену" и "Забрать"
+                    let actionButtons = `
+                        <div style="display:flex; gap:10px; margin-top:15px;">
+                            <button class="btn-main btn-small" style="background:#475569; flex:1;" onclick="openPriceModal(${lot.id}, '${lot.target_username}')">Изменить цену</button>
+                            ${lot.status === 'active' ? `<button class="btn-main btn-small" style="background:var(--error); flex:1;" onclick="openRecallModal(${lot.id}, '${lot.target_username}')">Забрать</button>` : ''}
+                        </div>
+                    `;
+
                     return `
                     <div class="input-box" style="padding:15px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                             <b style="font-size:18px;">@${lot.target_username}</b>
                             <span style="font-size:12px; color:var(--text-dim);">${statusText}</span>
                         </div>
-                        <div style="font-size:14px; margin-bottom:15px; color: #cbd5e1;">
+                        <div style="font-size:14px; color: #cbd5e1;">
                             Цена: <b>${lot.price} TON</b><br>
                             После холда (-2%): <b style="color:var(--warning);">${getAmount} TON</b>
                         </div>
-                        <button class="btn-main btn-small" style="background:#475569; width: 100%;" onclick="changePrice(${lot.id}, '${lot.target_username}')">Изменить цену</button>
-                    </div>
-                `}).join('');
-            } catch (e) {}
+                        ${actionButtons}
+                    </div>`
+                }).join('');
+            } catch (e) { }
         }
 
-        async function changePrice(lotId, tag) {
-            const newPrice = prompt(`Введите новую цену в TON для @${tag}:`);
-            if(!newPrice || isNaN(newPrice)) return;
-            try {
-                await fetch(`${API_URL}/lots/${lotId}/price`, { method: 'PATCH', headers, body: JSON.stringify({ new_price: parseFloat(newPrice) }) });
-                showNotification("Цена успешно обновлена!", "success");
-                renderProfile();
-                fetchLots();
-            } catch(e) { showNotification("Ошибка при смене цены", "error"); }
+        // --- МОДАЛКА: СМЕНА ЦЕНЫ ---
+        function openPriceModal(lotId, tag) {
+            showActionModal(`
+                <h3 style="margin-top:0;">Новая цена для @${tag}</h3>
+                <input type="number" id="new-price-input" placeholder="Введите цену в TON">
+                <div class="flex-btns">
+                    <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                    <button class="btn-confirm" onclick="submitPriceChange(${lotId})">Сохранить</button>
+                </div>
+            `);
         }
-
-        async function requestWithdraw() {
-            const amountStr = prompt(`Сколько TON вы хотите вывести?\nДоступно: ${document.getElementById('avail-balance').innerText}`);
-            if (!amountStr) return;
-            const amount = parseFloat(amountStr);
+        
+        async function submitPriceChange(lotId) {
+            const val = document.getElementById('new-price-input').value;
+            if(!val || isNaN(val)) return showNotification("Введите число!", "error");
             
+            closeActionModal();
+            try {
+                await fetch(`${API_URL}/lots/${lotId}/price`, { method: 'PATCH', headers, body: JSON.stringify({ new_price: parseFloat(val) }) });
+                showNotification("Цена успешно обновлена!", "success"); 
+                renderProfile(); 
+                fetchLots();
+            } catch(e) { showNotification("Ошибка сервера", "error"); }
+        }
+
+        // --- МОДАЛКА: ВОЗВРАТ КАНАЛА ---
+        function openRecallModal(lotId, tag) {
+            showActionModal(`
+                <h3 style="margin-top:0;">Вернуть канал @${tag}?</h3>
+                <p style="font-size:14px; color:var(--text-dim);">Лот будет снят с продажи, а бот вернет вам права владельца.</p>
+                <div class="flex-btns">
+                    <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                    <button class="btn-confirm" style="background:var(--error);" onclick="submitRecall(${lotId})">Да, забрать</button>
+                </div>
+            `);
+        }
+        
+        async function submitRecall(lotId) {
+            closeActionModal();
+            try {
+                const res = await fetch(`${API_URL}/lots/${lotId}/recall`, { method: 'POST', headers });
+                if(res.ok) { 
+                    showNotification("🔄 Запрос на возврат отправлен! Бот скоро отдаст вам права.", "success"); 
+                    renderProfile(); 
+                    fetchLots(); 
+                } else {
+                    showNotification("Ошибка возврата лота", "error");
+                }
+            } catch(e) { showNotification("Ошибка связи с сервером", "error"); }
+        }
+
+        // --- МОДАЛКА: ЗАПРОС НА ВЫВОД ---
+        function openWithdrawModal() {
+            const avail = document.getElementById('avail-balance').innerText;
+            showActionModal(`
+                <h3 style="margin-top:0;">Заявка на вывод</h3>
+                <p style="font-size:12px; color:var(--text-dim); margin-bottom:15px;">Доступно: ${avail}</p>
+                <input type="number" id="withdraw-amount" placeholder="Сумма TON">
+                <input type="text" id="withdraw-wallet" placeholder="Ваш TON адрес">
+                <div class="flex-btns">
+                    <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                    <button class="btn-confirm" onclick="submitWithdraw()">Вывести</button>
+                </div>
+            `);
+        }
+        
+        async function submitWithdraw() {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const wallet = document.getElementById('withdraw-wallet').value;
             const available = parseFloat(document.getElementById('avail-balance').innerText);
             
             if (isNaN(amount) || amount <= 0) return showNotification("Введите корректную сумму!", "error");
             if (amount > available) return showNotification("У вас недостаточно доступных средств!", "error");
-
-            const wallet = prompt("Введите ваш TON адрес кошелька для выплаты:");
             if (!wallet || wallet.trim().length < 40) return showNotification("Введите корректный TON адрес!", "error");
-
+            
+            closeActionModal();
             try {
-                const res = await fetch(`${API_URL}/withdraw`, {
+                const res = await fetch(`${API_URL}/withdraw`, { 
                     method: 'POST', headers, 
-                    body: JSON.stringify({ user_id: user.id, amount: amount, wallet_address: wallet.trim() })
+                    body: JSON.stringify({ user_id: user.id, amount: amount, wallet_address: wallet.trim() }) 
                 });
-
-                if (res.ok) {
-                    showNotification(`✅ Заявка на вывод ${amount} TON успешно создана!\nОжидайте.`, "success");
-                    fetchUserData();
+                
+                if (res.ok) { 
+                    showNotification(`✅ Заявка на вывод ${amount} TON успешно создана!`, "success"); 
+                    fetchUserData(); 
                 } else {
-                    const data = await res.json();
-                    showNotification(data.detail || "Ошибка при создании заявки", "error");
+                    showNotification("Ошибка при создании заявки", "error");
                 }
-            } catch (e) {
-                showNotification("Ошибка связи с сервером", "error");
-            }
+            } catch (e) { showNotification("Ошибка сервера", "error"); }
         }
 
+        // --- МОДАЛКА: ПОКУПКА ---
+        function openBuyModal(lotId, price) {
+            let internal = parseFloat(document.getElementById('avail-balance')?.innerText || "0");
+            
+            if (internal >= price) {
+                showActionModal(`
+                    <h3 style="margin-top:0;">Оплата с баланса</h3>
+                    <p style="font-size:14px; color:var(--text-dim);">У вас на балансе ${internal} TON.<br>Списать <b>${price} TON</b> за этот лот?</p>
+                    <div class="flex-btns">
+                        <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                        <button class="btn-confirm" onclick="submitInternalBuy(${lotId})">Купить</button>
+                    </div>
+                `);
+            } else {
+                if (!tonConnectUI.connected) return showNotification("Сначала подключите кошелек!", "warning");
+                proceedTonBuy(lotId, price);
+            }
+        }
+        
+        async function submitInternalBuy(lotId) {
+            closeActionModal();
+            try {
+                const res = await fetch(`${API_URL}/lots/${lotId}/buy-internal`, { method: 'POST', headers, body: JSON.stringify({ buyer_id: user.id }) });
+                if (res.ok) { 
+                    showNotification("✅ Лот успешно куплен с вашего внутреннего баланса!", "success"); 
+                    fetchLots(); 
+                    fetchUserData(); 
+                } else { 
+                    showNotification("Ошибка при покупке", "error"); 
+                }
+            } catch(e) { showNotification("Ошибка сервера", "error"); }
+        }
+        
+        async function proceedTonBuy(lotId, price) {
+            const cell = new TonWeb.boc.Cell(); 
+            cell.bits.writeUint(0, 32); 
+            cell.bits.writeString(`buy_lot_${lotId}`);
+            const payloadBase64 = TonWeb.utils.bytesToBase64(await cell.toBoc(false));
+            
+            try {
+                await tonConnectUI.sendTransaction({ 
+                    validUntil: Math.floor(Date.now() / 1000) + 360, 
+                    messages: [{ 
+                        address: "UQDKJrZT85ZyMPVkc0d2Q3kPIzOb4YEmJSb-oVtAZE-71AaU", 
+                        amount: (price * 1000000000).toString(), 
+                        payload: payloadBase64 
+                    }] 
+                });
+                showNotification("Транзакция отправлена! Ждем подтверждения сети...", "info");
+                
+                await fetch(`${API_URL}/lots/${lotId}/verify-payment`, { 
+                    method: 'POST', headers, body: JSON.stringify({ boc: "sent", buyer_id: user.id }) 
+                });
+            } catch (e) { showNotification("Оплата отменена", "error"); }
+        }
+
+        // --- НАВИГАЦИЯ ПО ВКЛАДКАМ ---
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active'); 
             element.classList.add('active');
             
             if(tabId === 'profile') { fetchUserData(); renderProfile(); }
             if(tabId === 'market') fetchLots();
         }
 
+        // --- ВЫСТАВЛЕНИЕ НОВОГО ЛОТА ---
         function openConfirmModal() {
             const tag = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
             
             if (!tag || !price) return showNotification("Заполните все поля!", "error");
             
-            document.getElementById('confirm-tag').innerText = tag;
+            document.getElementById('confirm-tag').innerText = tag; 
             document.getElementById('confirm-price').innerText = price;
             
-            document.getElementById('modal-step-1').style.display = 'block';
-            document.getElementById('modal-step-2').style.display = 'none';
+            document.getElementById('modal-step-1').style.display = 'block'; 
+            document.getElementById('modal-step-2').style.display = 'none'; 
             document.getElementById('modal-step-3').style.display = 'none';
             document.getElementById('custom-modal').style.display = 'flex';
         }
@@ -466,133 +665,80 @@
         async function confirmAndSend() {
             const tag = document.getElementById('confirm-tag').innerText;
             const price = document.getElementById('confirm-price').innerText;
-
+            
             try {
-                const res = await fetch(`${API_URL}/lots`, {
-                    method: 'POST', headers,
-                    body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price) })
+                const res = await fetch(`${API_URL}/lots`, { 
+                    method: 'POST', headers, 
+                    body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price) }) 
                 });
-
+                
                 const data = await res.json();
-                if (res.ok) {
-                    document.getElementById('modal-step-1').style.display = 'none';
-                    document.getElementById('modal-step-2').style.display = 'block';
+                if (res.ok) { 
+                    document.getElementById('modal-step-1').style.display = 'none'; 
+                    document.getElementById('modal-step-2').style.display = 'block'; 
                     startTimer(data.lot_id); 
-                } else {
-                    showNotification(data.detail || "Ошибка сервера", "error");
-                    closeModal();
+                } else { 
+                    showNotification(data.detail || "Ошибка сервера", "error"); 
+                    closeModal(); 
                 }
             } catch (e) { showNotification("Ошибка связи с сервером", "error"); }
         }
 
+        // --- ТАЙМЕРЫ ---
         function startTimer(lotId) {
-            clearInterval(timerInterval);
+            clearInterval(timerInterval); 
             clearInterval(statusInterval);
             
             let time = 300; 
-            const el = document.getElementById('countdown');
+            const el = document.getElementById('countdown'); 
             el.innerText = "05:00";
             
-            timerInterval = setInterval(() => {
-                time--;
-                let m = Math.floor(time / 60).toString().padStart(2, '0');
-                let s = (time % 60).toString().padStart(2, '0');
-                el.innerText = `${m}:${s}`;
-                if (time <= 0) {
-                    clearInterval(timerInterval);
-                    clearInterval(statusInterval);
-                    closeModal();
-                    showNotification("Время вышло! Если вы не передали права, лот отменен.", "error");
-                }
+            timerInterval = setInterval(() => { 
+                time--; 
+                el.innerText = `${Math.floor(time / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`; 
+                
+                if (time <= 0) { 
+                    clearInterval(timerInterval); 
+                    clearInterval(statusInterval); 
+                    closeModal(); 
+                    showNotification("Время вышло! Лот отменен.", "error"); 
+                } 
             }, 1000);
-
-            statusInterval = setInterval(async () => {
-                try {
-                    const res = await fetch(`${API_URL}/lots/${lotId}/status`, { headers });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.status === 'active') {
-                            clearInterval(timerInterval);
-                            clearInterval(statusInterval);
-                            document.getElementById('modal-step-2').style.display = 'none';
+            
+            statusInterval = setInterval(async () => { 
+                try { 
+                    const res = await fetch(`${API_URL}/lots/${lotId}/status`, { headers }); 
+                    if (res.ok) { 
+                        const data = await res.json(); 
+                        if (data.status === 'active') { 
+                            clearInterval(timerInterval); 
+                            clearInterval(statusInterval); 
+                            document.getElementById('modal-step-2').style.display = 'none'; 
                             document.getElementById('modal-step-3').style.display = 'block'; 
-                        }
-                    }
-                } catch(e) {}
+                        } 
+                    } 
+                } catch(e) {} 
             }, 5000);
         }
 
         function closeModal() { 
             document.getElementById('custom-modal').style.display = 'none'; 
-            clearInterval(timerInterval);
-            clearInterval(statusInterval);
+            clearInterval(timerInterval); 
+            clearInterval(statusInterval); 
+        }
+        
+        function closeModalAndRefresh() { 
+            closeModal(); 
+            fetchLots(); 
+            if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); 
         }
 
-        function closeModalAndRefresh() {
-            closeModal();
-            fetchLots();
-            if(document.getElementById('tab-profile').classList.contains('active')) renderProfile();
+        // --- СТАРТ ---
+        if (user) { 
+            fetchUserData(); 
+            fetchLots(); 
         }
-
-        async function buyLotWithWallet(lotId, price) {
-            let availElement = document.getElementById('avail-balance');
-            let internalBalance = availElement ? parseFloat(availElement.innerText) : 0;
-
-            if (internalBalance >= price) {
-                // Пока оставляем confirm (системное окно да/нет), так как оно требует выбора пользователя
-                if (confirm(`У вас на балансе ${internalBalance} TON.\nСписать ${price} TON для покупки этого лота?`)) {
-                    try {
-                        const res = await fetch(`${API_URL}/lots/${lotId}/buy-internal`, {
-                            method: 'POST', headers, body: JSON.stringify({ buyer_id: user.id })
-                        });
-                        const data = await res.json();
-                        
-                        if (res.ok) {
-                            showNotification("✅ Лот успешно куплен с вашего внутреннего баланса!", "success");
-                            fetchLots();
-                            fetchUserData();
-                        } else {
-                            showNotification(data.detail || "Ошибка при покупке", "error");
-                        }
-                    } catch(e) { showNotification("Ошибка сервера", "error"); }
-                    
-                    return; 
-                }
-            }
-
-            if (!tonConnectUI.connected) return showNotification("Сначала подключите кошелек!", "warning");
-
-            const comment = `buy_lot_${lotId}`;
-            const cell = new TonWeb.boc.Cell();
-            cell.bits.writeUint(0, 32); 
-            cell.bits.writeString(comment);
-            const payloadBytes = await cell.toBoc(false);
-            const payloadBase64 = TonWeb.utils.bytesToBase64(payloadBytes);
-
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 360,
-                messages: [{
-                    address: "UQDKJrZT85ZyMPVkc0d2Q3kPIzOb4YEmJSb-oVtAZE-71AaU",
-                    amount: (price * 1000000000).toString(),
-                    payload: payloadBase64
-                }]
-            };
-
-            try {
-                await tonConnectUI.sendTransaction(transaction);
-                showNotification("Транзакция отправлена! Ждем подтверждения сети...", "info");
-                await fetch(`${API_URL}/lots/${lotId}/verify-payment`, {
-                    method: 'POST', headers, body: JSON.stringify({ boc: "sent", buyer_id: user.id })
-                });
-            } catch (e) { showNotification("Оплата отменена", "error"); }
-        }
-
-        // ЗАПУСК ПРИЛОЖЕНИЯ
-        if (user) {
-            fetchUserData();
-            fetchLots();
-        }
-
+        
         setInterval(fetchLots, 15000);
     </script>
 </body>
