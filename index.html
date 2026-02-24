@@ -259,6 +259,28 @@
         <div id="lots-container"></div>
     </div>
 
+    <div id="tab-auctions" class="tab-content">
+        <div class="input-box">
+            <div class="section-title" style="margin-top: 0;">⏳ Создать аукцион</div>
+            <input type="text" id="auc-username-input" placeholder="Например: tag_name">
+            <input type="number" id="auc-price-input" placeholder="Стартовая цена (TON)">
+            <select id="auc-duration-input">
+                <option value="1">⏱ Таймер: 1 час</option>
+                <option value="2">⏱ Таймер: 2 часа</option>
+                <option value="8">⏱ Таймер: 8 часов</option>
+                <option value="24">⏱ Таймер: 24 часа</option>
+            </select>
+            <p style="font-size: 11px; color: var(--text-dim); margin-top: -5px;">Лимит: максимум 5 аукционов одновременно.</p>
+            <button class="btn-main" onclick="openConfirmAuctionModal()">Выставить на аукцион</button>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+            <div class="section-title" style="margin:0;">🔥 Идут торги</div>
+        </div>
+        
+        <div id="auctions-container"></div>
+    </div>
+
     <div id="tab-profile" class="tab-content">
         <div class="balance-card" style="text-align: left;">
             <div class="balance-label" id="profile-name" style="text-align: center; margin-bottom: 15px;">Ваш профиль</div>
@@ -300,12 +322,14 @@
             <h2 style="color: white; margin-top: 0;">ℹ️ Информация</h2>
             <p><b>Как продать юзернейм?</b><br>1. Введите тег и цену в разделе Маркет.<br>2. Нажмите "Выставить".<br>3. Передайте права владельца нашему боту <b>@TakeMyTag1</b> в течение 5 минут.</p>
             <p><b>Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">3.5%</b> от суммы сделки.</p>
+            <p><b>Аукционы:</b><br>Вы можете выставить тег на торги (от 1 до 24 часов). Ставки замораживаются на балансе покупателя. Если ставку перебили — деньги мгновенно возвращаются.</p>
             <p><b>Заморозка (Холд):</b><br>После покупки средства замораживаются на 1 час для безопасности сделки, после чего поступают на ваш доступный баланс.</p>
         </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('market', this)"><span class="nav-icon">🛒</span>Маркет</div>
+        <div class="nav-item" onclick="switchTab('auctions', this)"><span class="nav-icon">⏳</span>Аукционы</div>
         <div class="nav-item" onclick="switchTab('profile', this)"><span class="nav-icon">👤</span>Профиль</div>
         <div class="nav-item" onclick="switchTab('info', this)"><span class="nav-icon">ℹ️</span>Инфо</div>
     </div>
@@ -315,14 +339,14 @@
             <div id="modal-step-1">
                 <h2 style="margin-top:0; font-size: 22px;">Почти готово!</h2>
                 <div style="text-align:left; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
-                    <p><span class="step-num">1</span> Цена лота: <b id="confirm-price" style="color:white">0</b> TON</p>
+                    <p><span class="step-num">1</span> Цена: <b id="confirm-price" style="color:white">0</b> TON</p>
                     <p><span class="step-num">2</span> Передайте права владельца канала <b>@<span id="confirm-tag" style="color:white"></span></b> аккаунту:</p>
                     <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; text-align:center; font-weight:bold; color:#38bdf8; font-size: 16px; border: 1px dashed #38bdf8;">
                         @TakeMyTag1
                     </div>
                     <p style="font-size:11px; color:var(--text-dim); margin-top:12px;">🛡️ Юзербот автоматически выставит лот на витрину.</p>
                 </div>
-                <button class="btn-main" onclick="confirmAndSend()" style="margin-top: 25px;">Выставить и начать таймер</button>
+                <button class="btn-main" id="dynamic-confirm-btn" style="margin-top: 25px;">Выставить и начать таймер</button>
                 <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600;">Отмена</button>
             </div>
             
@@ -351,11 +375,13 @@
         const API_URL = "https://rapt-noella-myriadly.ngrok-free.dev/api";
         const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
         const user = tg.initDataUnsafe.user;
+        
         let allLots = [];
+        let allAuctions = []; // 💡 Добавлен массив для аукционов
+        
         let timerInterval;
         let statusInterval;
 
-        // 💡 Динамический калькулятор при вводе цены
         document.getElementById('price-input').addEventListener('input', function() {
             const val = parseFloat(this.value);
             const hint = document.getElementById('price-calc-hint');
@@ -450,10 +476,100 @@
             } catch (e) { }
         }
 
-        // 💡 НОВОЕ: Накручиваем счетчик при открытии превью
-        function openPreviewModal(lotId, tag, price) {
-            fetch(`${API_URL}/lots/${lotId}/view`, { method: 'POST', headers }); // Сигнал на сервер о просмотре
+        // 💡 НОВЫЙ КОД: Загрузка и рендер Аукционов
+        async function fetchAuctions() {
+            try {
+                const res = await fetch(`${API_URL}/auctions`, { headers });
+                allAuctions = await res.json();
+                renderAuctions();
+            } catch (e) { }
+        }
+
+        function formatTime(seconds) {
+            if (seconds <= 0) return "Завершено";
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function renderAuctions() {
+            const container = document.getElementById('auctions-container');
+            if (allAuctions.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-dim);margin-top:20px;">Нет активных торгов</div>';
+                return;
+            }
+
+            container.innerHTML = allAuctions.map(a => `
+                <div class="lot-item" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-weight:700; font-size:18px;">@${a.target_username}</div>
+                        <div style="color:#ef4444; font-weight:800; font-size:14px; font-family: monospace;" id="timer-auc-${a.id}">
+                            ${formatTime(a.time_left)}
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:12px; color:var(--text-dim);">Текущая ставка:</div>
+                            <div style="color:var(--accent-color); font-weight:800; font-size:16px;">${a.current_price} TON</div>
+                        </div>
+                        <button class="buy-btn" style="background:#f59e0b;" onclick="openBidModal(${a.id}, '${a.target_username}', ${a.current_price})">Сделать ставку</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Живой таймер для аукционов
+        setInterval(() => {
+            allAuctions.forEach(a => {
+                if (a.time_left > 0) {
+                    a.time_left--;
+                    const timerEl = document.getElementById(`timer-auc-${a.id}`);
+                    if (timerEl) timerEl.innerText = formatTime(a.time_left);
+                } else if (a.time_left === 0) {
+                    a.time_left = -1;
+                    const timerEl = document.getElementById(`timer-auc-${a.id}`);
+                    if (timerEl) timerEl.innerText = "Завершено";
+                }
+            });
+        }, 1000);
+
+        function openBidModal(aucId, tag, currentPrice) {
+            const minBid = (currentPrice * 1.05).toFixed(2);
+            showActionModal(`
+                <h3 style="margin-top:0;">Ставка на @${tag}</h3>
+                <p style="font-size:13px; color:var(--text-dim);">Текущая цена: <b>${currentPrice} TON</b></p>
+                <input type="number" id="bid-input" placeholder="Ставка (Мин. ${minBid} TON)">
+                <div class="flex-btns">
+                    <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                    <button class="btn-confirm" onclick="submitBid(${aucId}, ${currentPrice})">Поставить</button>
+                </div>
+                <p style="font-size:11px; color:var(--warning); margin-top:10px;">Спишется с баланса. Если её перебьют — деньги мгновенно вернутся.</p>
+            `);
+        }
+
+        async function submitBid(aucId, currentPrice) {
+            const amount = parseFloat(document.getElementById('bid-input').value);
+            if (isNaN(amount) || amount <= currentPrice) return showNotification(`Ставка должна быть больше ${currentPrice} TON!`, "error");
             
+            showActionModal(`<h3>Отправка ставки...</h3>`);
+            try {
+                const res = await fetch(`${API_URL}/auctions/${aucId}/bid`, { 
+                    method: 'POST', headers, body: JSON.stringify({ user_id: user.id, amount: amount }) 
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showNotification("✅ Ваша ставка принята!", "success");
+                    closeActionModal(); fetchAuctions(); fetchUserData(); 
+                } else {
+                    showNotification(data.detail || "Ошибка при ставке", "error");
+                    closeActionModal();
+                }
+            } catch (e) { showNotification("Ошибка сервера", "error"); closeActionModal(); }
+        }
+
+        function openPreviewModal(lotId, tag, price) {
+            fetch(`${API_URL}/lots/${lotId}/view`, { method: 'POST', headers }); 
             showActionModal(`
                 <div style="text-align: center;">
                     <div style="font-size: 45px; margin-bottom: 5px;">💎</div>
@@ -499,10 +615,9 @@
             tg.openTelegramLink(tgShareLink);
         }
 
-        // 💡 ИЗМЕНЕНО: Поиск и отображение счетчика просмотров
         function renderMarket() {
             const filter = document.getElementById('filter-select').value;
-            const searchQuery = document.getElementById('search-input').value.toLowerCase().replace('@', ''); // Читаем ввод
+            const searchQuery = document.getElementById('search-input').value.toLowerCase().replace('@', ''); 
             
             let sorted = [...allLots];
             
@@ -538,7 +653,6 @@
             `).join('');
         }
 
-        // 💡 ИЗМЕНЕНО: Отображение счетчика в профиле
         async function renderProfile() {
             if(!user) return;
             try {
@@ -797,6 +911,7 @@
             } catch (e) { showNotification("Оплата отменена", "error"); }
         }
 
+        // 💡 ИЗМЕНЕНО: Добавлен вызов аукционов при переключении вкладок
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -805,6 +920,7 @@
             
             if(tabId === 'profile') { fetchUserData(); renderProfile(); }
             if(tabId === 'market') fetchLots();
+            if(tabId === 'auctions') fetchAuctions();
         }
 
         function openConfirmModal() {
@@ -819,6 +935,7 @@
             document.getElementById('modal-step-1').style.display = 'block'; 
             document.getElementById('modal-step-2').style.display = 'none'; 
             document.getElementById('modal-step-3').style.display = 'none';
+            document.getElementById('dynamic-confirm-btn').onclick = confirmAndSend;
             document.getElementById('custom-modal').style.display = 'flex';
         }
 
@@ -842,6 +959,47 @@
                     closeModal(); 
                 }
             } catch (e) { showNotification("Ошибка связи с сервером", "error"); }
+        }
+
+        // 💡 НОВОЕ: Открытие модалки создания Аукциона
+        function openConfirmAuctionModal() {
+            const tag = document.getElementById('auc-username-input').value.replace('@', '').trim();
+            const price = document.getElementById('auc-price-input').value;
+            const duration = document.getElementById('auc-duration-input').value;
+            
+            if (!tag || !price) return showNotification("Заполните все поля!", "error");
+            
+            document.getElementById('confirm-tag').innerText = tag; 
+            document.getElementById('confirm-price').innerText = price;
+            
+            document.getElementById('modal-step-1').style.display = 'block'; 
+            document.getElementById('modal-step-2').style.display = 'none'; 
+            document.getElementById('modal-step-3').style.display = 'none';
+            document.getElementById('dynamic-confirm-btn').onclick = () => confirmAndSendAuction(tag, price, duration);
+            document.getElementById('custom-modal').style.display = 'flex';
+        }
+
+        // 💡 НОВОЕ: Отправка Аукциона на сервер
+        async function confirmAndSendAuction(tag, price, duration) {
+            try {
+                const res = await fetch(`${API_URL}/auctions`, { 
+                    method: 'POST', headers, 
+                    body: JSON.stringify({ user_id: user.id, target_username: tag, start_price: parseFloat(price), duration_hours: parseInt(duration) }) 
+                });
+                
+                const data = await res.json();
+                if (res.ok) { 
+                    document.getElementById('modal-step-1').style.display = 'none'; 
+                    document.getElementById('modal-step-2').style.display = 'block'; 
+                    setTimeout(() => { 
+                        closeModalAndRefresh(); 
+                        switchTab('auctions', document.querySelectorAll('.nav-item')[1]); 
+                    }, 10000);
+                } else { 
+                    showNotification(data.detail || "Ошибка сервера", "error"); 
+                    closeModal(); 
+                }
+            } catch (e) { showNotification("Ошибка связи", "error"); }
         }
 
         function startTimer(lotId) {
@@ -889,15 +1047,20 @@
         function closeModalAndRefresh() { 
             closeModal(); 
             fetchLots(); 
+            fetchAuctions();
             if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); 
         }
 
         if (user) { 
             fetchUserData(); 
             fetchLots(); 
+            fetchAuctions();
         }
         
-        setInterval(fetchLots, 15000);
+        setInterval(() => {
+            fetchLots(); 
+            fetchAuctions();
+        }, 15000);
     </script>
 </body>
 </html>
