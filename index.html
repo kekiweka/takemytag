@@ -980,7 +980,7 @@
         }
 
         // 💡 НОВОЕ: Отправка Аукциона на сервер
-        async function confirmAndSendAuction(tag, price, duration) {
+async function confirmAndSendAuction(tag, price, duration) {
             try {
                 const res = await fetch(`${API_URL}/auctions`, { 
                     method: 'POST', headers, 
@@ -991,10 +991,8 @@
                 if (res.ok) { 
                     document.getElementById('modal-step-1').style.display = 'none'; 
                     document.getElementById('modal-step-2').style.display = 'block'; 
-                    setTimeout(() => { 
-                        closeModalAndRefresh(); 
-                        switchTab('auctions', document.querySelectorAll('.nav-item')[1]); 
-                    }, 10000);
+                    // 💡 ЗАПУСКАЕМ НАСТОЯЩИЙ ТАЙМЕР ПРОВЕРКИ
+                    startTimerCheckAuction(data.auction_id); 
                 } else { 
                     showNotification(data.detail || "Ошибка сервера", "error"); 
                     closeModal(); 
@@ -1002,6 +1000,43 @@
             } catch (e) { showNotification("Ошибка связи", "error"); }
         }
 
+        // 💡 НОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ СТАТУСА АУКЦИОНА
+        function startTimerCheckAuction(aucId) {
+            clearInterval(timerInterval); 
+            clearInterval(statusInterval);
+            
+            let time = 300; 
+            const el = document.getElementById('countdown'); 
+            el.innerText = "05:00";
+            
+            timerInterval = setInterval(() => { 
+                time--; 
+                el.innerText = `${Math.floor(time / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`; 
+                if (time <= 0) { 
+                    clearInterval(timerInterval); 
+                    clearInterval(statusInterval); 
+                    closeModal(); 
+                    showNotification("Время вышло! Аукцион отменен.", "error"); 
+                } 
+            }, 1000);
+            
+            statusInterval = setInterval(async () => { 
+                try { 
+                    const res = await fetch(`${API_URL}/auctions/${aucId}/status`, { headers }); 
+                    if (res.ok) { 
+                        const data = await res.json(); 
+                        if (data.status === 'active') { 
+                            clearInterval(timerInterval); 
+                            clearInterval(statusInterval); 
+                            document.getElementById('modal-step-2').style.display = 'none'; 
+                            document.getElementById('modal-step-3').style.display = 'block'; 
+                        } 
+                    } 
+                } catch(e) {} 
+            }, 5000);
+        }
+
+        
         function startTimer(lotId) {
             clearInterval(timerInterval); 
             clearInterval(statusInterval);
