@@ -189,7 +189,7 @@
         .buy-btn { 
             background: var(--success); color: white; font-family: 'Montserrat', sans-serif; 
             border: none; padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; 
-            white-space: nowrap; /* Не даем кнопкам сжиматься и переноситься */
+            white-space: nowrap;
         }
         
         .tab-content { display: none; animation: fadeIn 0.3s ease; } 
@@ -335,6 +335,8 @@
 
             <div id="vip-tickets-display" style="display:none; text-align:center; font-size:12px; font-weight:bold; color:var(--success); margin-bottom:10px; background:rgba(16,185,129,0.1); padding:8px; border-radius:8px; border: 1px solid rgba(16,185,129,0.3);"></div>
 
+            <button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; font-size: 14px; margin-bottom: 10px; font-weight: 800;" onclick="openLeaderboardModal()">🏆 Топ продавцов</button>
+
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 <button class="btn-main btn-small" style="background: linear-gradient(135deg, #f59e0b, #d97706); flex: 1 1 100%; color: white; font-size: 14px;" onclick="openStarsDepositModal()">⭐️ Пополнить баланс (Stars)</button>
                 <button class="btn-main btn-small" style="background: #334155; flex: 1 1 45%;" onclick="openWithdrawModal()">💸 Вывод</button>
@@ -345,14 +347,13 @@
         </div>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-            <div class="section-title" style="margin:0;">Мои лоты</div>
+            <div class="section-title" style="margin:0;">Списки</div>
             <select id="profile-filter-select" onchange="renderProfile()" style="width:145px; margin:0; padding:8px 12px; font-size: 13px;">
-                <option value="all">Все лоты</option>
+                <option value="all">Мои лоты</option>
+                <option value="favorites" style="color: #ef4444; font-weight: bold;">❤️ Избранное</option>
                 <option value="active">В продаже</option>
                 <option value="sold">Проданные</option>
                 <option value="closed">Забранные / Отмена</option>
-                <option value="new">Сначала новые</option>
-                <option value="old">Сначала старые</option>
             </select>
         </div>
 
@@ -364,9 +365,8 @@
             <h2 style="color: white; margin-top: 0;">ℹ️ Информация</h2>
             <p><b>Как продать юзернейм?</b><br>1. Введите тег и цену в разделе Маркет.<br>2. Нажмите "Выставить".<br>3. Передайте права владельца нашему боту <b>@TakeMyTag1</b> в течение 5 минут.</p>
             <p><b>Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">3.5%</b> от суммы сделки.</p>
-            <p><b>Аукционы:</b><br>Вы можете выставить тег на торги (от 1 до 24 часов). Ставки замораживаются на балансе покупателя. Если ставку перебили — деньги мгновенно возвращаются.</p>
+            <p><b>Избранное:</b><br>Нажимайте 🤍 на витрине, чтобы отложить тег и быстро найти его в профиле во вкладке "Избранное".</p>
             <p><b>Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b>1%</b> с каждой их покупки в маркете или на аукционе!</p>
-            <p><b>Заморозка (Холд):</b><br>После покупки средства замораживаются на 1 час для безопасности сделки, после чего поступают на ваш доступный баланс.</p>
             <p><b>Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет с помощью официальных Telegram Stars.</p>
         </div>
     </div>
@@ -539,9 +539,11 @@
             } catch (e) { }
         }
 
+        // 💡 ИЗМЕНЕНО: Запрос маркета теперь передает user_id для проверки лайков
         async function fetchLots() {
             try {
-                const res = await fetch(`${API_URL}/lots`, { headers });
+                const url = user ? `${API_URL}/lots?user_id=${user.id}` : `${API_URL}/lots`;
+                const res = await fetch(url, { headers });
                 allLots = await res.json();
                 renderMarket();
                 checkStartParam(); 
@@ -554,6 +556,64 @@
                 allAuctions = await res.json();
                 renderAuctions();
             } catch (e) { }
+        }
+
+        // 💡 НОВОЕ: Функция переключения лайков
+        async function toggleFavorite(lotId) {
+            if (!user) return showNotification("Авторизуйтесь!", "error");
+            try {
+                const res = await fetch(`${API_URL}/lots/${lotId}/favorite`, {
+                    method: 'POST', headers, body: JSON.stringify({ user_id: user.id })
+                });
+                if (res.ok) {
+                    fetchLots(); // Обновляем витрину, чтобы перекрасить сердечко
+                    if(document.getElementById('tab-profile').classList.contains('active')) renderProfile();
+                }
+            } catch(e) {}
+        }
+
+        // 💡 НОВОЕ: Окно Топа Продавцов
+        async function openLeaderboardModal() {
+            showActionModal(`<h3>Загрузка...</h3>`);
+            try {
+                const res = await fetch(`${API_URL}/leaderboard`, { headers });
+                const top = await res.json();
+                
+                if (top.length === 0) {
+                    showActionModal(`
+                        <h3 style="margin-top:0;">🏆 Топ продавцов</h3>
+                        <p style="color:var(--text-dim);">Пока никто ничего не продал.</p>
+                        <button class="btn-main" onclick="closeActionModal()">Закрыть</button>
+                    `);
+                    return;
+                }
+
+                const html = top.map((t, index) => {
+                    let rank = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<b>${index + 1}.</b>`;
+                    return `
+                    <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="font-size:20px; width:25px; text-align:center;">${rank}</div>
+                            <div style="font-weight:700; font-size:14px; word-break: break-all;">${t.username}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="color:var(--accent-color); font-weight:800; font-size:15px;">${t.total_tons} TON</div>
+                            <div style="color:var(--text-dim); font-size:11px;">сделок: ${t.sales_count}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                showActionModal(`
+                    <h3 style="margin-top:0; margin-bottom:15px;">🏆 Топ продавцов</h3>
+                    <div class="history-container" style="max-height:55vh; overflow-y:auto; padding-right:5px; margin-bottom:15px; text-align:left;">
+                        ${html}
+                    </div>
+                    <button class="btn-main" onclick="closeActionModal()">Закрыть</button>
+                `);
+            } catch(e) {
+                showNotification("Ошибка загрузки рейтинга", "error");
+                closeActionModal();
+            }
         }
 
         function formatTime(seconds) {
@@ -692,17 +752,13 @@
             tg.openTelegramLink(tgShareLink);
         }
 
-        // 💡 ИЗМЕНЕНО: Новый, надежный дизайн карточек маркета
+        // 💡 ИЗМЕНЕНО: Добавлены кнопки-сердечки на витрину
         function renderMarket() {
             const filter = document.getElementById('filter-select').value;
             const searchQuery = document.getElementById('search-input').value.toLowerCase().replace('@', ''); 
             
             let sorted = [...allLots];
-            
-            if (searchQuery) {
-                sorted = sorted.filter(lot => lot.target_username.toLowerCase().includes(searchQuery));
-            }
-            
+            if (searchQuery) sorted = sorted.filter(lot => lot.target_username.toLowerCase().includes(searchQuery));
             if(filter === 'price_asc') sorted.sort((a,b) => a.price - b.price);
             if(filter === 'price_desc') sorted.sort((a,b) => b.price - a.price);
             if(filter === 'len_asc') sorted.sort((a,b) => a.target_username.length - b.target_username.length);
@@ -720,6 +776,7 @@
                 const vipClass = lot.is_vip ? 'vip-lot' : '';
                 const vipBadge = lot.is_vip ? '<span class="vip-badge">🔥 VIP</span>' : '';
                 const verifiedBadge = lot.seller_is_verified ? svgCheckmark : '';
+                const favIcon = lot.is_favorite ? '❤️' : '🤍';
 
                 return `
                 <div class="lot-item ${vipClass}" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -730,13 +787,13 @@
                             ${vipBadge}
                         </div>
                     </div>
-                    
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; width: 100%;">
                         <div style="display:flex; gap:10px; align-items:center;">
                             <div style="color:var(--accent-color); font-weight:600; font-size:15px;">${lot.price} TON</div>
                             <div style="color:var(--text-dim); font-size:12px;">👁 ${lot.views || 0}</div>
                         </div>
-                        <div style="display:flex; gap:8px; flex-shrink: 0;">
+                        <div style="display:flex; justify-content: flex-end; flex-wrap: wrap; gap:8px; flex-shrink: 0;">
+                            <button class="buy-btn" style="background:transparent; border: 1px solid rgba(255,255,255,0.2); padding: 8px 10px; font-size: 14px;" onclick="toggleFavorite(${lot.id})">${favIcon}</button>
                             <button class="buy-btn" style="background:#334155; padding: 8px 12px;" onclick="shareLot(${lot.id}, '${lot.target_username}', ${lot.price})">🔗</button>
                             <button class="buy-btn" style="background:var(--warning); padding: 8px 12px;" onclick="openOfferModal(${lot.id}, '${lot.target_username}', ${lot.price})">🤝</button>
                             <button class="buy-btn" style="padding: 8px 16px;" onclick="openPreviewModal(${lot.id}, '${lot.target_username}', ${lot.price})">Купить</button>
@@ -747,24 +804,26 @@
             }).join('');
         }
 
-        // 💡 ИЗМЕНЕНО: Надежный дизайн для профиля
+        // 💡 ИЗМЕНЕНО: Обработка избранного (чужих лотов) в профиле
         async function renderProfile() {
             if(!user) return;
             try {
-                const res = await fetch(`${API_URL}/users/${user.id}/lots`, {headers});
-                let myLots = await res.json();
-                
                 const filter = document.getElementById('profile-filter-select').value;
+                const url = filter === 'favorites' ? `${API_URL}/users/${user.id}/favorites` : `${API_URL}/users/${user.id}/lots`;
+                
+                const res = await fetch(url, {headers});
+                let myLots = await res.json();
                 
                 if (filter === 'active') myLots = myLots.filter(l => l.status === 'active' || l.status === 'pending_holder');
                 if (filter === 'sold') myLots = myLots.filter(l => l.status === 'sold' || l.status === 'locked' || l.status === 'completed');
                 if (filter === 'closed') myLots = myLots.filter(l => l.status === 'closed' || l.status === 'pending_return');
                 
-                if (filter === 'old') myLots.sort((a,b) => a.id - b.id);
-                else myLots.sort((a,b) => b.id - a.id);
+                if (filter !== 'favorites') {
+                    if (filter === 'old') myLots.sort((a,b) => a.id - b.id);
+                    else myLots.sort((a,b) => b.id - a.id);
+                }
 
                 const container = document.getElementById('profile-list');
-                
                 if(myLots.length === 0) {
                     container.innerHTML = '<div style="text-align:center;color:var(--text-dim);margin-top:20px;">Нет лотов по этому фильтру</div>';
                     return;
@@ -782,26 +841,40 @@
                     else if (lot.status === 'closed') { statusText = '⚪ Отменен / Забран'; }
                     else { statusText = '⚪ ' + lot.status; }
                     
-                    const getAmount = (lot.price * 0.965).toFixed(2);
-                    
                     let actionButtons = '';
-                    if (lot.status === 'active' || lot.status === 'pending_holder') {
-                        let vipBtnText = freeVipTickets > 0 ? `🎟 Использовать купон (Осталось: ${freeVipTickets})` : `🔥 Бустануть (0.5 TON)`;
-                        
-                        let vipButton = lot.is_vip 
-                            ? `<div style="color:#fbbf24; font-size:12px; font-weight:bold; margin-top:12px; text-align:center;">🔥 VIP статус активен</div>`
-                            : `<button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; flex:1; margin-top: 10px;" onclick="openVipModal(${lot.id}, '${lot.target_username}')">${vipBtnText}</button>`;
+                    let holdText = '';
 
+                    // 💡 Если лот МОЙ
+                    if (lot.seller_id === user.id) {
+                        holdText = `<br>После холда (-3.5%): <b style="color:var(--warning);">${(lot.price * 0.965).toFixed(2)} TON</b>`;
+                        
+                        if (lot.status === 'active' || lot.status === 'pending_holder') {
+                            let vipBtnText = freeVipTickets > 0 ? `🎟 Использовать купон (${freeVipTickets})` : `🔥 Бустануть (0.5 TON)`;
+                            let vipButton = lot.is_vip 
+                                ? `<div style="color:#fbbf24; font-size:12px; font-weight:bold; margin-top:12px; text-align:center;">🔥 VIP статус активен</div>`
+                                : `<button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; flex:1; margin-top: 10px;" onclick="openVipModal(${lot.id}, '${lot.target_username}')">${vipBtnText}</button>`;
+
+                            actionButtons = `
+                                <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
+                                    <button class="btn-main btn-small" style="background:#475569; flex:1; min-width: 120px;" onclick="openPriceModal(${lot.id}, '${lot.target_username}')">Изменить цену</button>
+                                    ${lot.status === 'active' ? `<button class="btn-main btn-small" style="background:var(--error); flex:1; min-width: 120px;" onclick="openRecallModal(${lot.id}, '${lot.target_username}')">Забрать</button>` : ''}
+                                </div>
+                                ${vipButton}
+                            `;
+                        }
+                    } else {
+                        // 💡 Если лот ЧУЖОЙ (из вкладки Избранное)
                         actionButtons = `
-                            <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
-                                <button class="btn-main btn-small" style="background:#475569; flex:1; min-width: 120px;" onclick="openPriceModal(${lot.id}, '${lot.target_username}')">Изменить цену</button>
-                                ${lot.status === 'active' ? `<button class="btn-main btn-small" style="background:var(--error); flex:1; min-width: 120px;" onclick="openRecallModal(${lot.id}, '${lot.target_username}')">Забрать</button>` : ''}
+                            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top: 15px; flex-wrap:wrap;">
+                                <button class="buy-btn" style="background:#334155; padding: 8px 12px; flex:1;" onclick="toggleFavorite(${lot.id})">❌ Убрать</button>
+                                <button class="buy-btn" style="background:var(--warning); padding: 8px 12px; flex:1;" onclick="openOfferModal(${lot.id}, '${lot.target_username}', ${lot.price})">🤝 Торг</button>
+                                <button class="buy-btn" style="padding: 8px 16px; flex:2;" onclick="openPreviewModal(${lot.id}, '${lot.target_username}', ${lot.price})">Купить</button>
                             </div>
-                            ${vipButton}
                         `;
                     }
 
                     const verifiedBadge = lot.seller_is_verified ? svgCheckmark : '';
+                    const vipBadge = lot.is_vip ? '<span class="vip-badge" style="margin-left:4px;">🔥 VIP</span>' : '';
 
                     return `
                     <div class="input-box" style="padding:16px; position:relative; overflow:hidden;">
@@ -810,14 +883,14 @@
                                 <b style="font-size:16px; word-break: break-all;">@${lot.target_username}</b>
                                 <div style="display: flex; align-items: center; flex-shrink: 0;">
                                     ${verifiedBadge}
+                                    ${vipBadge}
                                     <span style="color:var(--text-dim); font-size:12px; margin-left: 6px;">👁 ${lot.views || 0}</span>
                                 </div>
                             </div>
                             <span style="font-size:12px; font-weight:bold; color:${statusColor}; white-space: nowrap;">${statusText}</span>
                         </div>
                         <div style="font-size:14px; color: #cbd5e1;">
-                            Цена: <b>${lot.price} TON</b><br>
-                            После холда (-3.5%): <b style="color:var(--warning);">${getAmount} TON</b>
+                            Цена: <b>${lot.price} TON</b>${holdText}
                         </div>
                         ${actionButtons}
                     </div>`
@@ -958,7 +1031,6 @@
                 </div>
             `);
 
-            // 💡 КУРС 87 Звезд за 1 TON
             document.getElementById('stars-ton-input').addEventListener('input', function() {
                 const val = parseFloat(this.value);
                 const hint = document.getElementById('stars-calc-hint');
