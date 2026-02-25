@@ -161,7 +161,6 @@
             align-items: center; border: 1px solid rgba(255,255,255,0.05); 
         }
 
-        /* 💡 НОВЫЕ СТИЛИ ДЛЯ VIP ЛОТОВ */
         .vip-lot {
             border: 2px solid #fbbf24 !important;
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
@@ -180,6 +179,12 @@
             vertical-align: middle;
         }
         
+        .verified-badge {
+            font-size: 14px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
         .buy-btn { background: var(--success); color: white; font-family: 'Montserrat', sans-serif; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         
         .tab-content { display: none; animation: fadeIn 0.3s ease; } 
@@ -302,7 +307,7 @@
 
     <div id="tab-profile" class="tab-content">
         <div class="balance-card" style="text-align: left;">
-            <div class="balance-label" id="profile-name" style="text-align: center; margin-bottom: 15px;">Ваш профиль</div>
+            <div class="balance-label" id="profile-name" style="text-align: center; margin-bottom: 15px; font-size: 15px;">Ваш профиль</div>
             
             <div style="display: flex; justify-content: space-between; text-align: center; margin-bottom: 15px;">
                 <div style="width: 48%; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px;">
@@ -321,10 +326,13 @@
                 <button class="btn-main btn-small" style="margin-top: 12px; font-size: 13px; background: linear-gradient(135deg, #10b981, #059669);" onclick="copyRefLink()">🔗 Пригласить друга (1% с покупок)</button>
             </div>
 
+            <div id="vip-tickets-display" style="display:none; text-align:center; font-size:12px; font-weight:bold; color:var(--success); margin-bottom:10px; background:rgba(16,185,129,0.1); padding:8px; border-radius:8px; border: 1px solid rgba(16,185,129,0.3);"></div>
+
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 <button class="btn-main btn-small" style="background: #334155; flex: 1 1 45%;" onclick="openWithdrawModal()">💸 Вывод</button>
                 <button class="btn-main btn-small" style="background: #334155; flex: 1 1 45%;" onclick="openHistoryModal()">📜 История</button>
                 <button class="btn-main btn-small" style="background: var(--warning); flex: 1 1 100%; color: white;" onclick="openOffersModal()">🤝 Мои предложения (Торг)</button>
+                <button class="btn-main btn-small" style="background: #8b5cf6; flex: 1 1 100%; color: white;" onclick="openPromoModal()">🎁 Ввести промокод</button>
             </div>
         </div>
         
@@ -351,6 +359,7 @@
             <p><b>Аукционы:</b><br>Вы можете выставить тег на торги (от 1 до 24 часов). Ставки замораживаются на балансе покупателя. Если ставку перебили — деньги мгновенно возвращаются.</p>
             <p><b>Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b>1%</b> с каждой их покупки в маркете или на аукционе!</p>
             <p><b>Заморозка (Холд):</b><br>После покупки средства замораживаются на 1 час для безопасности сделки, после чего поступают на ваш доступный баланс.</p>
+            <p><b>Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет не только TON, но и с помощью Telegram Stars, написав боту команду <b>/deposit</b>.</p>
         </div>
     </div>
 
@@ -405,6 +414,7 @@
         
         let allLots = [];
         let allAuctions = []; 
+        let freeVipTickets = 0; // 💡 Добавили переменную для хранения купонов
         
         let timerInterval;
         let statusInterval;
@@ -497,12 +507,27 @@
             try {
                 const res = await fetch(url, { headers });
                 const data = await res.json();
-                document.getElementById('profile-name').innerText = `Привет, ${user.first_name}!`;
+                
+                // 💡 ИЗМЕНЕНО: Показываем галочку возле имени в профиле
+                const verifiedIcon = data.is_verified ? '<span class="verified-badge" title="Проверенный продавец">✅</span>' : '';
+                document.getElementById('profile-name').innerHTML = `Привет, ${user.first_name}! ${verifiedIcon}`;
+                
                 document.getElementById('avail-balance').innerText = `${data.available_balance.toFixed(2)} TON`;
                 document.getElementById('froz-balance').innerText = `${data.frozen_balance.toFixed(2)} TON`;
                 if(document.getElementById('ref-earnings')) {
                     document.getElementById('ref-earnings').innerText = `${(data.ref_earnings || 0).toFixed(2)} TON`;
                 }
+
+                // 💡 ИЗМЕНЕНО: Обновляем билеты
+                freeVipTickets = data.free_vip_tickets || 0;
+                const ticketsDisplay = document.getElementById('vip-tickets-display');
+                if (freeVipTickets > 0) {
+                    ticketsDisplay.innerText = `🎟 У вас есть ${freeVipTickets} бесплатных купонов на VIP-буст!`;
+                    ticketsDisplay.style.display = 'block';
+                } else {
+                    ticketsDisplay.style.display = 'none';
+                }
+
             } catch (e) { }
         }
 
@@ -659,7 +684,6 @@
             tg.openTelegramLink(tgShareLink);
         }
 
-        // 💡 ИЗМЕНЕНО: Отрисовка витрины с учетом VIP
         function renderMarket() {
             const filter = document.getElementById('filter-select').value;
             const searchQuery = document.getElementById('search-input').value.toLowerCase().replace('@', ''); 
@@ -675,7 +699,6 @@
             if(filter === 'len_asc') sorted.sort((a,b) => a.target_username.length - b.target_username.length);
             if(filter === 'len_desc') sorted.sort((a,b) => b.target_username.length - a.target_username.length);
 
-            // 🔥 VIP лоты всегда наверху
             sorted.sort((a, b) => (b.is_vip ? 1 : 0) - (a.is_vip ? 1 : 0));
 
             const container = document.getElementById('lots-container');
@@ -687,11 +710,13 @@
             container.innerHTML = sorted.map(lot => {
                 const vipClass = lot.is_vip ? 'vip-lot' : '';
                 const vipBadge = lot.is_vip ? '<span class="vip-badge">🔥 VIP</span>' : '';
+                // 💡 ИЗМЕНЕНО: Добавлена галочка, если продавец верифицирован
+                const verifiedBadge = lot.seller_is_verified ? '<span class="verified-badge" title="Проверенный продавец">✅</span>' : '';
 
                 return `
                 <div class="lot-item ${vipClass}">
                     <div>
-                        <div style="font-weight:700; font-size:16px;">@${lot.target_username} ${vipBadge}</div>
+                        <div style="font-weight:700; font-size:16px;">@${lot.target_username} ${verifiedBadge} ${vipBadge}</div>
                         <div style="display:flex; gap:10px; align-items:center; margin-top:4px;">
                             <div style="color:var(--accent-color); font-weight:600; font-size:14px;">${lot.price} TON</div>
                             <div style="color:var(--text-dim); font-size:12px;">👁 ${lot.views || 0}</div>
@@ -707,7 +732,6 @@
             }).join('');
         }
 
-        // 💡 ИЗМЕНЕНО: Отрисовка профиля с кнопкой покупки VIP
         async function renderProfile() {
             if(!user) return;
             try {
@@ -746,10 +770,12 @@
                     
                     let actionButtons = '';
                     if (lot.status === 'active' || lot.status === 'pending_holder') {
-                        // Кнопка VIP или текст, что он уже куплен
+                        // 💡 ИЗМЕНЕНО: Изменен текст кнопки на основе наличия билетов
+                        let vipBtnText = freeVipTickets > 0 ? `🎟 Использовать купон (Осталось: ${freeVipTickets})` : `🔥 Бустануть (0.5 TON)`;
+                        
                         let vipButton = lot.is_vip 
                             ? `<div style="color:#fbbf24; font-size:12px; font-weight:bold; margin-top:12px; text-align:center;">🔥 VIP статус активен</div>`
-                            : `<button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; flex:1; margin-top: 10px;" onclick="openVipModal(${lot.id}, '${lot.target_username}')">🔥 Бустануть (0.5 TON)</button>`;
+                            : `<button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; flex:1; margin-top: 10px;" onclick="openVipModal(${lot.id}, '${lot.target_username}')">${vipBtnText}</button>`;
 
                         actionButtons = `
                             <div style="display:flex; gap:10px; margin-top:15px;">
@@ -760,11 +786,14 @@
                         `;
                     }
 
+                    // Галочка для собственных лотов
+                    const verifiedBadge = lot.seller_is_verified ? '<span class="verified-badge" title="Проверенный продавец">✅</span>' : '';
+
                     return `
                     <div class="input-box" style="padding:15px; position:relative; overflow:hidden;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <b style="font-size:18px;">@${lot.target_username}</b>
+                                <b style="font-size:18px;">@${lot.target_username} ${verifiedBadge}</b>
                                 <span style="color:var(--text-dim); font-size:12px;">👁 ${lot.views || 0}</span>
                             </div>
                             <span style="font-size:12px; font-weight:bold; color:${statusColor};">${statusText}</span>
@@ -828,21 +857,27 @@
             }
         }
 
-        // 💡 НОВОЕ: Окно покупки VIP
+        // 💡 ИЗМЕНЕНО: Окно VIP учитывает наличие билетов
         function openVipModal(lotId, tag) {
+            let costText = freeVipTickets > 0 
+                ? "<span style='color:#10b981;'>Бесплатно (1 купон)</span>" 
+                : "<span style='color:#fbbf24;'>0.5 TON</span>";
+                
+            let btnText = freeVipTickets > 0 ? "Использовать купон" : "Купить VIP";
+            
             showActionModal(`
                 <h3 style="margin-top:0; color:#fbbf24;">🔥 VIP Размещение</h3>
                 <p style="font-size:14px; color:var(--text-dim); line-height: 1.5;">
                     Ваш лот <b>@${tag}</b> будет закреплен на самом верху витрины и получит красивую золотую рамку.
                 </p>
                 <div style="font-size: 18px; font-weight: bold; color: white; margin: 15px 0;">
-                    Стоимость: <span style="color:#fbbf24;">0.5 TON</span>
+                    Стоимость: ${costText}
                 </div>
                 <div class="flex-btns">
                     <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
-                    <button class="btn-confirm" style="background:#f59e0b; color:#000;" onclick="submitVip(${lotId})">Купить VIP</button>
+                    <button class="btn-confirm" style="background:#f59e0b; color:#000;" onclick="submitVip(${lotId})">${btnText}</button>
                 </div>
-                <p style="font-size:11px; color:var(--warning); margin-top:10px;">Сумма спишется с вашего внутреннего баланса.</p>
+                ${freeVipTickets === 0 ? '<p style="font-size:11px; color:var(--warning); margin-top:10px;">Сумма спишется с вашего внутреннего баланса.</p>' : ''}
             `);
         }
 
@@ -862,6 +897,39 @@
                     showNotification(data.detail || "Ошибка при покупке VIP", "error");
                 }
             } catch (e) { showNotification("Ошибка сервера", "error"); }
+        }
+
+        // 💡 НОВОЕ: Окно ввода промокода
+        function openPromoModal() {
+            showActionModal(`
+                <h3 style="margin-top:0;">🎁 Активация промокода</h3>
+                <p style="font-size:13px; color:var(--text-dim); margin-bottom: 15px;">Введите промокод, чтобы получить бонусы, например, бесплатные купоны на VIP-буст.</p>
+                <input type="text" id="promo-input" placeholder="Код (например, START2026)" style="text-transform: uppercase;">
+                <div class="flex-btns">
+                    <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                    <button class="btn-confirm" style="background:#8b5cf6;" onclick="submitPromo()">Активировать</button>
+                </div>
+            `);
+        }
+
+        // 💡 НОВОЕ: Отправка промокода на сервер
+        async function submitPromo() {
+            const code = document.getElementById('promo-input').value.trim();
+            if(!code) return showNotification("Введите промокод!", "error");
+            
+            closeActionModal();
+            try {
+                const res = await fetch(`${API_URL}/promo/apply`, {
+                    method: 'POST', headers, body: JSON.stringify({ user_id: user.id, code: code })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showNotification(`✅ Промокод успешно активирован!\nВы получили ${data.reward} VIP-купон(а)!`, "success");
+                    fetchUserData();
+                } else {
+                    showNotification(data.detail || "Ошибка активации", "error");
+                }
+            } catch(e) { showNotification("Ошибка сервера", "error"); }
         }
 
         function openOfferModal(lotId, tag, currentPrice) {
