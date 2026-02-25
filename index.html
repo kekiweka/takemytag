@@ -21,7 +21,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --error: #ef4444;
-            --premium-color: #8b5cf6; /* Фиолетовый цвет для галочки */
+            --premium-color: #8b5cf6; 
         }
 
         body {
@@ -157,7 +157,7 @@
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-left: 5px; }
         
         .lot-item { 
-            background: var(--card-bg); padding: 18px; border-radius: 16px; 
+            background: var(--card-bg); padding: 16px; border-radius: 16px; 
             margin-bottom: 12px; display: flex; justify-content: space-between; 
             align-items: center; border: 1px solid rgba(255,255,255,0.05); 
         }
@@ -174,13 +174,23 @@
             font-weight: 800;
             padding: 3px 6px;
             border-radius: 6px;
-            margin-left: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
             vertical-align: middle;
+            display: inline-block;
         }
         
-        .buy-btn { background: var(--success); color: white; font-family: 'Montserrat', sans-serif; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .buy-btn { 
+            background: var(--success); color: white; font-family: 'Montserrat', sans-serif; 
+            border: none; padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; 
+            white-space: nowrap; /* Не даем кнопкам сжиматься и переноситься */
+        }
         
         .tab-content { display: none; animation: fadeIn 0.3s ease; } 
         .tab-content.active { display: block; }
@@ -327,7 +337,6 @@
 
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 <button class="btn-main btn-small" style="background: linear-gradient(135deg, #f59e0b, #d97706); flex: 1 1 100%; color: white; font-size: 14px;" onclick="openStarsDepositModal()">⭐️ Пополнить баланс (Stars)</button>
-                
                 <button class="btn-main btn-small" style="background: #334155; flex: 1 1 45%;" onclick="openWithdrawModal()">💸 Вывод</button>
                 <button class="btn-main btn-small" style="background: #334155; flex: 1 1 45%;" onclick="openHistoryModal()">📜 История</button>
                 <button class="btn-main btn-small" style="background: var(--warning); flex: 1 1 100%; color: white;" onclick="openOffersModal()">🤝 Мои предложения (Торг)</button>
@@ -358,6 +367,7 @@
             <p><b>Аукционы:</b><br>Вы можете выставить тег на торги (от 1 до 24 часов). Ставки замораживаются на балансе покупателя. Если ставку перебили — деньги мгновенно возвращаются.</p>
             <p><b>Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b>1%</b> с каждой их покупки в маркете или на аукционе!</p>
             <p><b>Заморозка (Холд):</b><br>После покупки средства замораживаются на 1 час для безопасности сделки, после чего поступают на ваш доступный баланс.</p>
+            <p><b>Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет с помощью официальных Telegram Stars.</p>
         </div>
     </div>
 
@@ -417,8 +427,7 @@
         let timerInterval;
         let statusInterval;
 
-        // 💡 НОВОЕ: Фиолетовая SVG Галочка
-        const svgCheckmark = `<svg style="width:16px; height:16px; margin-left:4px; vertical-align:text-bottom; filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.4));" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L14.59 3.53L18.96 4.2L19.78 8.44L23.09 11.1L20.85 14.88L22.5 19.04L18.42 20.3L16.29 24L12 22.36L7.71 24L5.58 20.3L1.5 19.04L3.15 14.88L0.91 11.1L4.22 8.44L5.04 4.2L9.41 3.53L12 0Z" fill="var(--premium-color)"/><path d="M10.2 16.2L6 12L7.4 10.6L10.2 13.4L16.6 7L18 8.4L10.2 16.2Z" fill="white"/></svg>`;
+        const svgCheckmark = `<svg style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:text-bottom; filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.4)); flex-shrink: 0;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L14.59 3.53L18.96 4.2L19.78 8.44L23.09 11.1L20.85 14.88L22.5 19.04L18.42 20.3L16.29 24L12 22.36L7.71 24L5.58 20.3L1.5 19.04L3.15 14.88L0.91 11.1L4.22 8.44L5.04 4.2L9.41 3.53L12 0Z" fill="var(--premium-color)"/><path d="M10.2 16.2L6 12L7.4 10.6L10.2 13.4L16.6 7L18 8.4L10.2 16.2Z" fill="white"/></svg>`;
 
         document.getElementById('price-input').addEventListener('input', function() {
             const val = parseFloat(this.value);
@@ -564,13 +573,13 @@
 
             container.innerHTML = allAuctions.map(a => `
                 <div class="lot-item" style="flex-direction: column; align-items: stretch; gap: 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="font-weight:700; font-size:18px;">@${a.target_username}</div>
-                        <div style="color:#ef4444; font-weight:800; font-size:14px; font-family: monospace;" id="timer-auc-${a.id}">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; width: 100%;">
+                        <div style="font-weight:700; font-size:18px; word-break: break-all; margin-right: 10px;">@${a.target_username}</div>
+                        <div style="color:#ef4444; font-weight:800; font-size:14px; font-family: monospace; flex-shrink: 0;" id="timer-auc-${a.id}">
                             ${formatTime(a.time_left)}
                         </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
                         <div>
                             <div style="font-size:12px; color:var(--text-dim);">Текущая ставка:</div>
                             <div style="color:var(--accent-color); font-weight:800; font-size:16px;">${a.current_price} TON</div>
@@ -644,7 +653,7 @@
                     <h3 style="margin-top:0; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Покупка юзернейма</h3>
                     
                     <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), transparent); border: 1px solid rgba(56, 189, 248, 0.3); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h2 style="margin:0 0 5px 0; font-size: 26px; color: white;">@${tag}</h2>
+                        <h2 style="margin:0 0 5px 0; font-size: 26px; color: white; word-break: break-all;">@${tag}</h2>
                         <div style="font-size: 22px; font-weight: 800; color: var(--accent-color);">${price} TON</div>
                     </div>
 
@@ -683,6 +692,7 @@
             tg.openTelegramLink(tgShareLink);
         }
 
+        // 💡 ИЗМЕНЕНО: Новый, надежный дизайн карточек маркета
         function renderMarket() {
             const filter = document.getElementById('filter-select').value;
             const searchQuery = document.getElementById('search-input').value.toLowerCase().replace('@', ''); 
@@ -712,26 +722,32 @@
                 const verifiedBadge = lot.seller_is_verified ? svgCheckmark : '';
 
                 return `
-                <div class="lot-item ${vipClass}">
-                    <div>
-                        <div style="font-weight:700; font-size:16px; display:flex; align-items:center;">
-                            @${lot.target_username} ${verifiedBadge} ${vipBadge}
-                        </div>
-                        <div style="display:flex; gap:10px; align-items:center; margin-top:4px;">
-                            <div style="color:var(--accent-color); font-weight:600; font-size:14px;">${lot.price} TON</div>
-                            <div style="color:var(--text-dim); font-size:12px;">👁 ${lot.views || 0}</div>
+                <div class="lot-item ${vipClass}" style="flex-direction: column; align-items: stretch; gap: 12px;">
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <span style="font-weight:700; font-size:16px; word-break: break-all;">@${lot.target_username}</span>
+                        <div style="display: flex; align-items: center; flex-shrink: 0;">
+                            ${verifiedBadge}
+                            ${vipBadge}
                         </div>
                     </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="buy-btn" style="background:#334155; padding: 10px 14px;" onclick="shareLot(${lot.id}, '${lot.target_username}', ${lot.price})">🔗</button>
-                        <button class="buy-btn" style="background:var(--warning); padding: 10px 14px;" onclick="openOfferModal(${lot.id}, '${lot.target_username}', ${lot.price})">🤝</button>
-                        <button class="buy-btn" onclick="openPreviewModal(${lot.id}, '${lot.target_username}', ${lot.price})">Купить</button>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; width: 100%;">
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <div style="color:var(--accent-color); font-weight:600; font-size:15px;">${lot.price} TON</div>
+                            <div style="color:var(--text-dim); font-size:12px;">👁 ${lot.views || 0}</div>
+                        </div>
+                        <div style="display:flex; gap:8px; flex-shrink: 0;">
+                            <button class="buy-btn" style="background:#334155; padding: 8px 12px;" onclick="shareLot(${lot.id}, '${lot.target_username}', ${lot.price})">🔗</button>
+                            <button class="buy-btn" style="background:var(--warning); padding: 8px 12px;" onclick="openOfferModal(${lot.id}, '${lot.target_username}', ${lot.price})">🤝</button>
+                            <button class="buy-btn" style="padding: 8px 16px;" onclick="openPreviewModal(${lot.id}, '${lot.target_username}', ${lot.price})">Купить</button>
+                        </div>
                     </div>
                 </div>
                 `;
             }).join('');
         }
 
+        // 💡 ИЗМЕНЕНО: Надежный дизайн для профиля
         async function renderProfile() {
             if(!user) return;
             try {
@@ -777,9 +793,9 @@
                             : `<button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; flex:1; margin-top: 10px;" onclick="openVipModal(${lot.id}, '${lot.target_username}')">${vipBtnText}</button>`;
 
                         actionButtons = `
-                            <div style="display:flex; gap:10px; margin-top:15px;">
-                                <button class="btn-main btn-small" style="background:#475569; flex:1;" onclick="openPriceModal(${lot.id}, '${lot.target_username}')">Изменить цену</button>
-                                ${lot.status === 'active' ? `<button class="btn-main btn-small" style="background:var(--error); flex:1;" onclick="openRecallModal(${lot.id}, '${lot.target_username}')">Забрать</button>` : ''}
+                            <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
+                                <button class="btn-main btn-small" style="background:#475569; flex:1; min-width: 120px;" onclick="openPriceModal(${lot.id}, '${lot.target_username}')">Изменить цену</button>
+                                ${lot.status === 'active' ? `<button class="btn-main btn-small" style="background:var(--error); flex:1; min-width: 120px;" onclick="openRecallModal(${lot.id}, '${lot.target_username}')">Забрать</button>` : ''}
                             </div>
                             ${vipButton}
                         `;
@@ -788,13 +804,16 @@
                     const verifiedBadge = lot.seller_is_verified ? svgCheckmark : '';
 
                     return `
-                    <div class="input-box" style="padding:15px; position:relative; overflow:hidden;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <b style="font-size:18px; display:flex; align-items:center;">@${lot.target_username} ${verifiedBadge}</b>
-                                <span style="color:var(--text-dim); font-size:12px;">👁 ${lot.views || 0}</span>
+                    <div class="input-box" style="padding:16px; position:relative; overflow:hidden;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
+                            <div style="display:flex; align-items:center; flex-wrap: wrap; gap:6px;">
+                                <b style="font-size:16px; word-break: break-all;">@${lot.target_username}</b>
+                                <div style="display: flex; align-items: center; flex-shrink: 0;">
+                                    ${verifiedBadge}
+                                    <span style="color:var(--text-dim); font-size:12px; margin-left: 6px;">👁 ${lot.views || 0}</span>
+                                </div>
                             </div>
-                            <span style="font-size:12px; font-weight:bold; color:${statusColor};">${statusText}</span>
+                            <span style="font-size:12px; font-weight:bold; color:${statusColor}; white-space: nowrap;">${statusText}</span>
                         </div>
                         <div style="font-size:14px; color: #cbd5e1;">
                             Цена: <b>${lot.price} TON</b><br>
@@ -865,7 +884,7 @@
             showActionModal(`
                 <h3 style="margin-top:0; color:#fbbf24;">🔥 VIP Размещение</h3>
                 <p style="font-size:14px; color:var(--text-dim); line-height: 1.5;">
-                    Ваш лот <b>@${tag}</b> будет закреплен на самом верху витрины и получит красивую золотую рамку.
+                    Ваш лот <b style="word-break: break-all;">@${tag}</b> будет закреплен на самом верху витрины и получит красивую золотую рамку.
                 </p>
                 <div style="font-size: 18px; font-weight: bold; color: white; margin: 15px 0;">
                     Стоимость: ${costText}
@@ -927,7 +946,6 @@
             } catch(e) { showNotification("Ошибка сервера", "error"); }
         }
 
-        // 💡 НОВОЕ: Открытие окна пополнения звездами
         function openStarsDepositModal() {
             showActionModal(`
                 <h3 style="margin-top:0;">Пополнение ⭐️</h3>
@@ -936,23 +954,22 @@
                 <div id="stars-calc-hint" style="color:var(--warning); font-size:15px; font-weight:bold; margin-top:10px; margin-bottom:15px; text-align:center;">К оплате: 0 ⭐️</div>
                 <div class="flex-btns">
                     <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
-                    <button class="btn-confirm" style="background:#f59e0b; color:#000;" onclick="submitStarsDeposit()">Оплатить Telegram Stars</button>
+                    <button class="btn-confirm" style="background:#f59e0b; color:#000;" onclick="submitStarsDeposit()">Оплатить Stars</button>
                 </div>
             `);
 
-            // Динамический калькулятор курса
+            // 💡 КУРС 87 Звезд за 1 TON
             document.getElementById('stars-ton-input').addEventListener('input', function() {
                 const val = parseFloat(this.value);
                 const hint = document.getElementById('stars-calc-hint');
                 if (!isNaN(val) && val > 0) {
-                    hint.innerHTML = `К оплате: ${Math.ceil(val * 87)} ⭐️`; // Умножаем на курс (250)
+                    hint.innerHTML = `К оплате: ${Math.ceil(val * 87)} ⭐️`; 
                 } else {
                     hint.innerHTML = `К оплате: 0 ⭐️`;
                 }
             });
         }
 
-        // 💡 НОВОЕ: Создание счета и открытие системного окна оплаты
         async function submitStarsDeposit() {
             const tonAmount = parseFloat(document.getElementById('stars-ton-input').value);
             if (isNaN(tonAmount) || tonAmount < 0.1) return showNotification("Минимальная сумма 0.1 TON", "error");
@@ -967,11 +984,10 @@
                 const data = await res.json();
                 
                 if (res.ok && data.invoice_link) {
-                    // Открываем нативное окно Telegram оплаты!
                     tg.openInvoice(data.invoice_link, function(status) {
                         if (status === 'paid') {
                             showNotification("✅ Оплата прошла успешно! Баланс пополнен.", "success");
-                            setTimeout(fetchUserData, 1500); // Обновляем баланс с небольшой задержкой
+                            setTimeout(fetchUserData, 1500); 
                         } else if (status === 'failed') {
                             showNotification("❌ Ошибка при оплате", "error");
                         } else {
@@ -988,7 +1004,7 @@
 
         function openOfferModal(lotId, tag, currentPrice) {
             showActionModal(`
-                <h3 style="margin-top:0;">Предложить цену за @${tag}</h3>
+                <h3 style="margin-top:0;">Предложить цену за <span style="word-break: break-all;">@${tag}</span></h3>
                 <p style="font-size:13px; color:var(--text-dim);">Текущая цена: <b>${currentPrice} TON</b></p>
                 <input type="number" id="offer-input" placeholder="Ваша цена (TON)">
                 <div class="flex-btns">
@@ -1043,8 +1059,8 @@
                     
                     return `
                     <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
-                        <div>
-                            <div style="font-weight:700; font-size:15px; margin-bottom:4px;">@${o.target_username}</div>
+                        <div style="max-width: 60%;">
+                            <div style="font-weight:700; font-size:15px; margin-bottom:4px; word-break: break-all;">@${o.target_username}</div>
                             <div style="font-size:12px; color:${statusColor}; font-weight:bold;">${statusText}</div>
                         </div>
                         <div style="text-align:right;">
@@ -1069,7 +1085,7 @@
 
         function openPriceModal(lotId, tag) {
             showActionModal(`
-                <h3 style="margin-top:0;">Новая цена для @${tag}</h3>
+                <h3 style="margin-top:0;">Новая цена для <span style="word-break: break-all;">@${tag}</span></h3>
                 <input type="number" id="new-price-input" placeholder="Введите цену в TON" oninput="window.updateModalPriceHint(this.value)">
                 <div id="modal-price-calc-hint" style="color: var(--warning); font-size: 13px; margin-top: -5px; margin-bottom: 12px; display: none; text-align: right; font-weight: 600;"></div>
                 <div class="flex-btns">
@@ -1094,7 +1110,7 @@
 
         function openRecallModal(lotId, tag) {
             showActionModal(`
-                <h3 style="margin-top:0;">Вернуть канал @${tag}?</h3>
+                <h3 style="margin-top:0;">Вернуть канал <span style="word-break: break-all;">@${tag}</span>?</h3>
                 <p style="font-size:14px; color:var(--text-dim);">Лот будет снят с продажи, а бот вернет вам права владельца.</p>
                 <div class="flex-btns">
                     <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
