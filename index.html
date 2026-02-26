@@ -127,7 +127,7 @@
         .history-container::-webkit-scrollbar { width: 4px; }
         .history-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
-        /* 💡 ЭКРАН ВЫБОРА ЯЗЫКА */
+        /* 💡 ЭКРАН ВЫБОРА ЯЗЫКА (ДО ЗАГРУЗКИ) */
         #lang-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5,5,5,0.8); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
@@ -143,29 +143,31 @@
         }
         .lang-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
 
-        /* 💡 ЛОАДЕР И ЛЕТАЮЩИЕ ТЕГИ */
+        /* 💡 НОВЫЙ ЛОАДЕР С ЛЕТАЮЩИМИ ТЕГАМИ */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050505; z-index: 15000; display: none;
             flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.5s ease; overflow: hidden;
         }
-        .loader-logo { width: 120px; height: 120px; border-radius: 25px; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); margin-bottom: 25px; animation: pulse 2s infinite ease-in-out; object-fit: cover; }
-        .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .loader-logo { width: 120px; height: 120px; border-radius: 25px; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); margin-bottom: 25px; object-fit: cover; position: relative; z-index: 10; }
+        .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; z-index: 10;}
         .loader-bar { height: 100%; width: 0%; background: var(--accent-color); border-radius: 10px; box-shadow: 0 0 10px var(--accent-color); transition: width 0.1s linear; }
         
+        /* Стили для летающих тегов (Параллакс) */
         .floating-tag {
             position: absolute; font-weight: 800; white-space: nowrap; pointer-events: none;
             z-index: 1; user-select: none;
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.4), rgba(139, 92, 246, 0.4));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: floatUp infinite linear;
+            color: rgba(255, 255, 255, 0.15); /* Читаемый полупрозрачный белый */
+            animation: floatUp linear infinite;
         }
+        /* Неоновое свечение для некоторых тегов */
+        .glow-blue { color: rgba(56, 189, 248, 0.2); text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        .glow-purple { color: rgba(139, 92, 246, 0.2); text-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
+
         @keyframes floatUp {
-            0% { transform: translateY(80vh) scale(0.5); opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { transform: translateY(-30vh) scale(1.2); opacity: 0; }
+            0% { transform: translateY(110vh); }
+            100% { transform: translateY(-30vh); }
         }
     </style>
 </head>
@@ -185,18 +187,22 @@
     </div>
 
     <div id="loader">
-        <div class="floating-tag" style="left: 15%; animation-duration: 4s; animation-delay: 0s; font-size: 22px;">@durov</div>
-        <div class="floating-tag" style="left: 75%; animation-duration: 5.5s; animation-delay: 1s; font-size: 28px;">@crow</div>
-        <div class="floating-tag" style="left: 35%; animation-duration: 4.5s; animation-delay: 0.5s; font-size: 20px;">@monk</div>
-        <div class="floating-tag" style="left: 85%; animation-duration: 6s; animation-delay: 2s; font-size: 24px;">@crypto</div>
-        <div class="floating-tag" style="left: 10%; animation-duration: 5s; animation-delay: 1.5s; font-size: 26px;">@ton</div>
-        <div class="floating-tag" style="left: 55%; animation-duration: 4.2s; animation-delay: 0.8s; font-size: 18px;">@meta</div>
+        <div class="floating-tag" style="left: 10%; animation-duration: 8s; animation-delay: 0s; font-size: 24px;">@durov</div>
+        <div class="floating-tag glow-blue" style="left: 70%; animation-duration: 10s; animation-delay: 1s; font-size: 32px;">@crow</div>
+        <div class="floating-tag" style="left: 25%; animation-duration: 7s; animation-delay: 2.5s; font-size: 20px;">@monk</div>
+        <div class="floating-tag" style="left: 80%; animation-duration: 9s; animation-delay: 0.5s; font-size: 28px;">@crypto</div>
+        <div class="floating-tag glow-purple" style="left: 15%; animation-duration: 11s; animation-delay: 4s; font-size: 36px;">@ton</div>
+        <div class="floating-tag" style="left: 60%; animation-duration: 8.5s; animation-delay: 3s; font-size: 22px;">@meta</div>
+        <div class="floating-tag" style="left: 40%; animation-duration: 9.5s; animation-delay: 1.5s; font-size: 26px;">@nuhao</div>
+        <div class="floating-tag" style="left: 85%; animation-duration: 7.5s; animation-delay: 3.5s; font-size: 20px;">@family</div>
+        <div class="floating-tag" style="left: 5%; animation-duration: 10.5s; animation-delay: 2s; font-size: 30px;">@fragment</div>
+        <div class="floating-tag glow-blue" style="left: 50%; animation-duration: 8s; animation-delay: 4.5s; font-size: 24px;">@market</div>
         
-        <div style="z-index: 10; display: flex; flex-direction: column; align-items: center;">
+        <div style="z-index: 10; display: flex; flex-direction: column; align-items: center; position: relative;">
             <img src="logo.jpg" alt="Logo" class="loader-logo">
-            <div style="font-size: 24px; font-weight: 800; margin-bottom: 25px; letter-spacing: 1px; color: white;">TakeMyTag</div>
+            <div style="font-size: 26px; font-weight: 800; margin-bottom: 25px; letter-spacing: 1px; color: white; text-shadow: 0 0 15px rgba(0,0,0,0.5);">TakeMyTag</div>
             <div class="loader-bar-container"><div class="loader-bar" id="loader-bar"></div></div>
-            <div style="margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--accent-color);"><span id="loader-percent">0</span>%</div>
+            <div style="margin-top: 15px; font-size: 15px; font-weight: bold; color: var(--accent-color);"><span id="loader-percent">0</span>%</div>
         </div>
     </div>
 
@@ -296,6 +302,8 @@
                 <option value="active" data-ru="В продаже" data-en="On Sale">В продаже</option>
                 <option value="sold" data-ru="Проданные" data-en="Sold">Проданные</option>
                 <option value="closed" data-ru="Забранные / Отмена" data-en="Recalled / Cancelled">Забранные / Отмена</option>
+                <option value="new" data-ru="Сначала новые" data-en="Newest First">Сначала новые</option>
+                <option value="old" data-ru="Сначала старые" data-en="Oldest First">Сначала старые</option>
             </select>
         </div>
 
@@ -389,7 +397,7 @@
         let freeVipTickets = 0; 
         let timerInterval, statusInterval;
 
-        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS (Переводится ВСЁ)
+        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS
         let currentLang = 'ru'; 
         const _dict = {
             'buy': {ru: 'Купить', en: 'Buy'},
@@ -435,35 +443,38 @@
             document.getElementById('wallet-status').innerText = tonConnectUI.connected ? _t('connected') : _t('connect_wallet');
         }
 
-        // 💡 ЛОГИКА: Показ лоадера ПОД экраном выбора языка (убирает мерцание)
+        // 💡 ЛОГИКА ВЫБОРА ЯЗЫКА ПЕРЕД ЗАГРУЗКОЙ (БЕСШОВНЫЙ ПЕРЕХОД)
         function selectLanguage(lang) {
             currentLang = lang;
             updateStaticTexts();
             
-            // Включаем лоадер заранее (он пока под черным экраном)
+            // Заранее показываем лоадер под экраном выбора языка
             const loader = document.getElementById('loader');
             loader.style.display = 'flex';
             loader.style.opacity = '1';
 
-            // Плавно растворяем экран выбора языка
+            // Плавно прячем окно выбора языка
             document.getElementById('lang-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('lang-screen').style.display = 'none';
-                startAppLoader(); // Только теперь запускаем бегунок процентов
+                startAppLoader(); // Запускаем прогресс-бар
             }, 500);
         }
 
+        // 💡 ЗАГРУЗКА РОВНО 3 СЕКУНДЫ
         function startAppLoader() {
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
             const barEl = document.getElementById("loader-bar");
             const loader = document.getElementById('loader');
             
+            // 100 шагов по 30 мс = 3000 мс (3 секунды)
             const interval = setInterval(() => {
-                percent += 3; 
+                percent += 1; 
                 if (percent >= 100) percent = 100;
                 percentEl.innerText = percent; 
                 barEl.style.width = percent + "%";
+                
                 if (percent === 100) { 
                     clearInterval(interval); 
                     setTimeout(() => { 
