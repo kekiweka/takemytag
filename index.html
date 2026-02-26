@@ -127,7 +127,7 @@
         .history-container::-webkit-scrollbar { width: 4px; }
         .history-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
-        /* 💡 ЭКРАН ВЫБОРА ЯЗЫКА (ДО ЗАГРУЗКИ) */
+        /* ЭКРАН ВЫБОРА ЯЗЫКА */
         #lang-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5,5,5,0.8); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
@@ -143,7 +143,7 @@
         }
         .lang-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
 
-        /* 💡 ИДЕАЛЬНЫЙ ЛОАДЕР С ЛЕТАЮЩИМИ ТЕГАМИ (3D Эффект) */
+        /* ИДЕАЛЬНЫЙ ЛОАДЕР С ЛЕТАЮЩИМИ ТЕГАМИ (3D Эффект) */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050505; z-index: 15000; display: none;
@@ -345,11 +345,51 @@
         </div>
     </div>
 
+    <div id="tab-admin" class="tab-content">
+        <div class="balance-card glass-card">
+            <h2 style="margin:0 0 15px 0;" data-ru="🛠 Панель Администратора" data-en="🛠 Admin Panel">🛠 Панель Администратора</h2>
+            <button class="btn-main btn-small" style="background:rgba(255,255,255,0.1); border: 1px solid var(--glass-border); margin-bottom:15px;" onclick="loadAdminStats()" data-ru="Обновить статистику 🔄" data-en="Refresh Stats 🔄">Обновить статистику 🔄</button>
+            <div id="admin-stats" style="display:flex; justify-content:space-around; text-align:center; font-size:13px; color:var(--text-main);">
+                Загрузка...
+            </div>
+        </div>
+
+        <div class="input-box glass-card">
+            <h3 style="margin-top:0; display:flex; justify-content:space-between; align-items:center;">
+                <span data-ru="💸 Заявки на вывод" data-en="💸 Withdraw Requests">💸 Заявки на вывод</span>
+                <button class="btn-main btn-small" style="width:auto; padding:6px 10px; background:rgba(255,255,255,0.1);" onclick="loadAdminWithdrawals()">🔄</button>
+            </h3>
+            <div id="admin-withdrawals" style="max-height: 250px; overflow-y: auto; padding-right:5px;" data-ru="Нет заявок" data-en="No requests">Нет заявок</div>
+        </div>
+
+        <div class="input-box glass-card">
+            <h3 style="margin-top:0;" data-ru="💰 Выдать баланс (TON)" data-en="💰 Add Balance (TON)">💰 Выдать баланс (TON)</h3>
+            <input type="number" id="admin-bal-id" placeholder="Telegram ID">
+            <input type="number" id="admin-bal-amount" placeholder="Сумма (TON)" data-ru="Сумма (TON)" data-en="Amount (TON)">
+            <button class="btn-main" onclick="adminAddBalance()" data-ru="Выдать баланс" data-en="Add Balance">Выдать баланс</button>
+        </div>
+
+        <div class="input-box glass-card">
+            <h3 style="margin-top:0;" data-ru="✅ Выдать верификацию" data-en="✅ Verify User">✅ Выдать верификацию</h3>
+            <input type="number" id="admin-ver-id" placeholder="Telegram ID">
+            <button class="btn-main" style="background:var(--premium-color);" onclick="adminVerify()" data-ru="Выдать галочку" data-en="Verify">Выдать галочку</button>
+        </div>
+
+        <div class="input-box glass-card">
+            <h3 style="margin-top:0;" data-ru="🎁 Создать промокод" data-en="🎁 Create Promo">🎁 Создать промокод</h3>
+            <input type="text" id="admin-promo-code" placeholder="Код (MEGA2026)" style="text-transform: uppercase;">
+            <input type="number" id="admin-promo-uses" placeholder="Кол-во активаций" data-ru="Кол-во активаций" data-en="Uses limit">
+            <input type="number" id="admin-promo-tickets" placeholder="Кол-во VIP-купонов" data-ru="Кол-во VIP-купонов" data-en="VIP Tickets reward">
+            <button class="btn-main" style="background:var(--success);" onclick="adminCreatePromo()" data-ru="Создать промокод" data-en="Create Promo">Создать промокод</button>
+        </div>
+    </div>
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('market', this)"><span class="nav-icon">🛒</span><span data-ru="Маркет" data-en="Market">Маркет</span></div>
         <div class="nav-item" onclick="switchTab('auctions', this)"><span class="nav-icon">⏳</span><span data-ru="Аукционы" data-en="Auctions">Аукционы</span></div>
         <div class="nav-item" onclick="switchTab('profile', this)"><span class="nav-icon">👤</span><span data-ru="Профиль" data-en="Profile">Профиль</span></div>
         <div class="nav-item" onclick="switchTab('info', this)"><span class="nav-icon">ℹ️</span><span data-ru="Инфо" data-en="Info">Инфо</span></div>
+        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchTab('admin', this)"><span class="nav-icon">🛠</span><span data-ru="Админ" data-en="Admin">Админ</span></div>
     </div>
 
     <div id="custom-modal" class="modal-overlay">
@@ -384,6 +424,8 @@
 
     <script>
         const BOT_USERNAME = "TakeMyTag_bot"; 
+        const ADMIN_ID = 1308339129; // 💡 ВАЖНО: Твой ID Администратора
+
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#050505'); 
@@ -397,7 +439,6 @@
         let freeVipTickets = 0; 
         let timerInterval, statusInterval;
 
-        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS (Переводится ВСЁ)
         let currentLang = 'ru'; 
         const _dict = {
             'buy': {ru: 'Купить', en: 'Buy'},
@@ -443,25 +484,21 @@
             document.getElementById('wallet-status').innerText = tonConnectUI.connected ? _t('connected') : _t('connect_wallet');
         }
 
-        // 💡 ЛОГИКА: Показ лоадера ПОД экраном выбора языка (убирает мерцание)
         function selectLanguage(lang) {
             currentLang = lang;
             updateStaticTexts();
             
-            // Включаем лоадер заранее (он пока под черным экраном)
             const loader = document.getElementById('loader');
             loader.style.display = 'flex';
             loader.style.opacity = '1';
 
-            // Плавно растворяем экран выбора языка
             document.getElementById('lang-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('lang-screen').style.display = 'none';
-                startAppLoader(); // Только теперь запускаем бегунок процентов
+                startAppLoader(); 
             }, 500);
         }
 
-        // ЗАГРУЗКА РОВНО 3 СЕКУНДЫ
         function startAppLoader() {
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
@@ -483,7 +520,17 @@
                 }
             }, 30);
 
-            if (user) { fetchUserData(); fetchLots(); fetchAuctions(); }
+            if (user) { 
+                fetchUserData(); 
+                fetchLots(); 
+                fetchAuctions(); 
+                // 💡 ОТКРЫВАЕМ ПАНЕЛЬ АДМИНА ЕСЛИ ЭТО ТЫ
+                if (user.id === ADMIN_ID) {
+                    document.getElementById('nav-admin').style.display = 'block';
+                    loadAdminStats();
+                    loadAdminWithdrawals();
+                }
+            }
         }
 
         const svgCheckmark = `<svg style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:text-bottom; filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.6)); flex-shrink: 0;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L14.59 3.53L18.96 4.2L19.78 8.44L23.09 11.1L20.85 14.88L22.5 19.04L18.42 20.3L16.29 24L12 22.36L7.71 24L5.58 20.3L1.5 19.04L3.15 14.88L0.91 11.1L4.22 8.44L5.04 4.2L9.41 3.53L12 0Z" fill="var(--premium-color)"/><path d="M10.2 16.2L6 12L7.4 10.6L10.2 13.4L16.6 7L18 8.4L10.2 16.2Z" fill="white"/></svg>`;
@@ -860,7 +907,7 @@
                         typeName = t.type === 'deposit' ? 'Пополнение' : t.type === 'withdrawal' ? 'Вывод / Покупка' : t.type === 'sale_income' ? 'Продажа лота' : t.type === 'commission_fee' ? (t.amount > 0 ? 'Комиссия / Реферал' : 'Комиссия системы') : t.type;
                     }
                     let statusIcon = t.status === 'completed' ? '✅' : t.status === 'pending' ? '⏳' : '❌';
-                    return `<div style="background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); padding:12px; border-radius:16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; text-align:left;"><div><div style="font-weight:600; font-size:13px; margin-bottom:4px;">${statusIcon} ${typeName}</div><div style="color:var(--text-dim); font-size:11px;">${t.date}</div></div><div style="color:${color}; font-weight:800; font-size:15px;">${sign}${t.amount} TON</div></div>`;
+                    return `<div style="background:rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding:12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;"><div><div style="font-weight:600; font-size:13px; margin-bottom:4px;">${statusIcon} ${typeName}</div><div style="color:var(--text-dim); font-size:11px;">${t.date}</div></div><div style="color:${color}; font-weight:800; font-size:15px;">${sign}${t.amount} TON</div></div>`;
                 }).join('');
 
                 showActionModal(`<h3 style="margin-top:0; margin-bottom:15px;">${historyStr}</h3><div class="history-container" style="max-height:55vh; overflow-y:auto; padding-right:5px; margin-bottom:15px;">${txHtml}</div><button class="btn-main" onclick="closeActionModal()">${_t('ok')}</button>`);
@@ -1219,6 +1266,95 @@
 
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; clearInterval(timerInterval); clearInterval(statusInterval); }
         function closeModalAndRefresh() { closeModal(); fetchLots(); fetchAuctions(); if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); }
+
+        // ==========================================
+        // 🛠 ЛОГИКА АДМИН-ПАНЕЛИ (Добавлена в твой код!)
+        // ==========================================
+        async function loadAdminStats() {
+            try {
+                const res = await fetch(`${API_URL}/admin/stats?admin_id=${ADMIN_ID}`, {headers});
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('admin-stats').innerHTML = `
+                        <div><div style="font-size:20px; font-weight:bold; color:white;">${data.users}</div>👥 Юзеры</div>
+                        <div><div style="font-size:20px; font-weight:bold; color:var(--success);">${data.lots}</div>🔥 Лоты</div>
+                        <div><div style="font-size:20px; font-weight:bold; color:var(--warning);">${data.withdrawals}</div>⏳ Выводы</div>
+                    `;
+                }
+            } catch (e) {}
+        }
+
+        async function loadAdminWithdrawals() {
+            try {
+                const res = await fetch(`${API_URL}/admin/withdrawals?admin_id=${ADMIN_ID}`, {headers});
+                if (res.ok) {
+                    const data = await res.json();
+                    const container = document.getElementById('admin-withdrawals');
+                    if (data.length === 0) {
+                        container.innerHTML = `<div style="color:var(--text-dim); font-size:13px;">Нет активных заявок.</div>`;
+                        return;
+                    }
+                    container.innerHTML = data.map(w => `
+                        <div style="background:rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding:12px; border-radius:12px; margin-bottom:10px;">
+                            <div style="font-size:12px; color:var(--text-dim);">ID: ${w.user_id}</div>
+                            <div style="font-size:16px; font-weight:bold; color:var(--accent-color); margin:4px 0;">${w.amount} TON</div>
+                            <div style="font-size:11px; word-break:break-all; margin-bottom:10px; color:white;">${w.wallet}</div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-main btn-small" style="background:var(--success); flex:1;" onclick="processWithdrawal(${w.id}, 'approve')">✅ Выдал</button>
+                                <button class="btn-main btn-small" style="background:var(--error); flex:1;" onclick="processWithdrawal(${w.id}, 'reject')">❌ Отказ</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {}
+        }
+
+        async function processWithdrawal(id, action) {
+            try {
+                const res = await fetch(`${API_URL}/admin/withdrawals/${id}`, {
+                    method: 'POST', headers, body: JSON.stringify({ admin_id: ADMIN_ID, action: action })
+                });
+                if (res.ok) { showNotification("Заявка обработана!", "success"); loadAdminWithdrawals(); }
+                else { showNotification("Ошибка обработки", "error"); }
+            } catch(e) {}
+        }
+
+        async function adminAddBalance() {
+            const tid = document.getElementById('admin-bal-id').value;
+            const amount = document.getElementById('admin-bal-amount').value;
+            if(!tid || !amount) return showNotification("Заполните поля", "error");
+            try {
+                const res = await fetch(`${API_URL}/admin/balance`, {
+                    method: 'POST', headers, body: JSON.stringify({ admin_id: ADMIN_ID, target_id: parseInt(tid), amount: parseFloat(amount) })
+                });
+                if (res.ok) { showNotification("Баланс успешно выдан!", "success"); document.getElementById('admin-bal-id').value = ''; document.getElementById('admin-bal-amount').value = ''; }
+            } catch(e) {}
+        }
+
+        async function adminVerify() {
+            const tid = document.getElementById('admin-ver-id').value;
+            if(!tid) return showNotification("Введите ID", "error");
+            try {
+                const res = await fetch(`${API_URL}/admin/verify`, {
+                    method: 'POST', headers, body: JSON.stringify({ admin_id: ADMIN_ID, target_id: parseInt(tid) })
+                });
+                if (res.ok) { showNotification("Галочка выдана!", "success"); document.getElementById('admin-ver-id').value = ''; }
+            } catch(e) {}
+        }
+
+        async function adminCreatePromo() {
+            const code = document.getElementById('admin-promo-code').value;
+            const uses = document.getElementById('admin-promo-uses').value;
+            const tix = document.getElementById('admin-promo-tickets').value;
+            if(!code || !uses || !tix) return showNotification("Заполните поля", "error");
+            try {
+                const res = await fetch(`${API_URL}/admin/promo`, {
+                    method: 'POST', headers, body: JSON.stringify({ admin_id: ADMIN_ID, code: code, uses: parseInt(uses), tickets: parseInt(tix) })
+                });
+                if (res.ok) { showNotification("Промокод создан!", "success"); }
+                else { showNotification("Ошибка или код уже есть", "error"); }
+            } catch(e) {}
+        }
 
     </script>
 </body>
