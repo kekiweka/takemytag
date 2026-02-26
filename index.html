@@ -127,7 +127,7 @@
         .history-container::-webkit-scrollbar { width: 4px; }
         .history-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
-        /* 💡 ЭКРАН ВЫБОРА ЯЗЫКА (ДО ЗАГРУЗКИ) */
+        /* 💡 ЭКРАН ВЫБОРА ЯЗЫКА */
         #lang-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5,5,5,0.8); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
@@ -139,17 +139,34 @@
             padding: 20px 40px; font-size: 18px; font-weight: 700; color: white;
             margin-bottom: 15px; width: 80%; max-width: 300px; text-align: center;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2); font-family: 'Montserrat', sans-serif; cursor: pointer;
+            transition: 0.3s;
         }
-        
+        .lang-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+        /* 💡 ЛОАДЕР И ЛЕТАЮЩИЕ ТЕГИ */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050505; z-index: 15000; display: none;
             flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease; overflow: hidden;
         }
         .loader-logo { width: 120px; height: 120px; border-radius: 25px; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); margin-bottom: 25px; animation: pulse 2s infinite ease-in-out; object-fit: cover; }
         .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
         .loader-bar { height: 100%; width: 0%; background: var(--accent-color); border-radius: 10px; box-shadow: 0 0 10px var(--accent-color); transition: width 0.1s linear; }
+        
+        .floating-tag {
+            position: absolute; font-weight: 800; white-space: nowrap; pointer-events: none;
+            z-index: 1; user-select: none;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.4), rgba(139, 92, 246, 0.4));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: floatUp infinite linear;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(80vh) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-30vh) scale(1.2); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -168,10 +185,19 @@
     </div>
 
     <div id="loader">
-        <img src="logo.jpg" alt="Logo" class="loader-logo">
-        <div style="font-size: 24px; font-weight: 800; margin-bottom: 25px; letter-spacing: 1px;">TakeMyTag</div>
-        <div class="loader-bar-container"><div class="loader-bar" id="loader-bar"></div></div>
-        <div style="margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--accent-color);"><span id="loader-percent">0</span>%</div>
+        <div class="floating-tag" style="left: 15%; animation-duration: 4s; animation-delay: 0s; font-size: 22px;">@durov</div>
+        <div class="floating-tag" style="left: 75%; animation-duration: 5.5s; animation-delay: 1s; font-size: 28px;">@crow</div>
+        <div class="floating-tag" style="left: 35%; animation-duration: 4.5s; animation-delay: 0.5s; font-size: 20px;">@monk</div>
+        <div class="floating-tag" style="left: 85%; animation-duration: 6s; animation-delay: 2s; font-size: 24px;">@crypto</div>
+        <div class="floating-tag" style="left: 10%; animation-duration: 5s; animation-delay: 1.5s; font-size: 26px;">@ton</div>
+        <div class="floating-tag" style="left: 55%; animation-duration: 4.2s; animation-delay: 0.8s; font-size: 18px;">@meta</div>
+        
+        <div style="z-index: 10; display: flex; flex-direction: column; align-items: center;">
+            <img src="logo.jpg" alt="Logo" class="loader-logo">
+            <div style="font-size: 24px; font-weight: 800; margin-bottom: 25px; letter-spacing: 1px; color: white;">TakeMyTag</div>
+            <div class="loader-bar-container"><div class="loader-bar" id="loader-bar"></div></div>
+            <div style="margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--accent-color);"><span id="loader-percent">0</span>%</div>
+        </div>
     </div>
 
     <div id="toast-container"></div>
@@ -330,7 +356,7 @@
                     </div>
                     <p style="font-size:11px; color:var(--text-dim); margin-top:12px;" data-ru="🛡️ Юзербот автоматически выставит лот на витрину." data-en="🛡️ The bot will automatically list your item.">🛡️ Юзербот автоматически выставит лот на витрину.</p>
                 </div>
-                <button class="btn-main" id="dynamic-confirm-btn" style="margin-top: 25px;" data-ru="Выставить и начать таймер" data-en="List and Start Timer">Выставить и начать таймер</button>
+                <button class="btn-main" id="dynamic-confirm-btn" style="margin-top: 25px;">Выставить и начать таймер</button>
                 <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; width: 100%;" data-ru="Отмена" data-en="Cancel">Отмена</button>
             </div>
             <div id="modal-step-2" style="display: none;">
@@ -363,7 +389,7 @@
         let freeVipTickets = 0; 
         let timerInterval, statusInterval;
 
-        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS (ТЕПЕРЬ ВСЕ ОКНА ПЕРЕВОДЯТСЯ!)
+        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS (Переводится ВСЁ)
         let currentLang = 'ru'; 
         const _dict = {
             'buy': {ru: 'Купить', en: 'Buy'},
@@ -373,8 +399,8 @@
             'change_price': {ru: 'Изменить цену', en: 'Change Price'},
             'recall': {ru: 'Забрать', en: 'Recall'},
             'use_ticket': {ru: '🎟 Купон', en: '🎟 Ticket'},
-            'boost': {ru: '🔥 Буст (0.5 TON)', en: '🔥 Boost (0.5 TON)'},
-            'vip_active': {ru: '🔥 VIP Активен', en: '🔥 VIP Active'},
+            'boost': {ru: '🔥 Бустануть (0.5 TON)', en: '🔥 Boost (0.5 TON)'},
+            'vip_active': {ru: '🔥 VIP статус активен', en: '🔥 VIP Active'},
             'you_get': {ru: 'Вы получите:', en: 'You will get:'},
             'loading': {ru: 'Загрузка...', en: 'Loading...'},
             'nothing': {ru: 'Ничего не найдено 😔', en: 'Nothing found 😔'},
@@ -385,9 +411,9 @@
             'make_bid': {ru: 'Сделать ставку', en: 'Place Bid'},
             'status_active': {ru: '🟢 На витрине', en: '🟢 Active'},
             'status_pending': {ru: '🟡 Ждет прав', en: '🟡 Pending'},
-            'status_return': {ru: '🔄 Возврат...', en: '🔄 Returning...'},
-            'status_hold': {ru: '🤝 Холд', en: '🤝 Hold'},
-            'status_sold': {ru: '✅ Закрыто', en: '✅ Sold'},
+            'status_return': {ru: '🔄 Возвращаем...', en: '🔄 Returning...'},
+            'status_hold': {ru: '🤝 Продан (Холд)', en: '🤝 Hold'},
+            'status_sold': {ru: '✅ Сделка закрыта', en: '✅ Sold'},
             'status_cancel': {ru: '⚪ Отменен / Забран', en: '⚪ Cancelled'},
             'hold_after': {ru: 'После холда (-3.5%):', en: 'After hold (-3.5%):'},
             'success': {ru: 'Успешно!', en: 'Success!'},
@@ -409,25 +435,29 @@
             document.getElementById('wallet-status').innerText = tonConnectUI.connected ? _t('connected') : _t('connect_wallet');
         }
 
-        // 💡 ЛОГИКА ВЫБОРА ЯЗЫКА ПЕРЕД ЗАГРУЗКОЙ
+        // 💡 ЛОГИКА: Показ лоадера ПОД экраном выбора языка (убирает мерцание)
         function selectLanguage(lang) {
             currentLang = lang;
             updateStaticTexts();
             
+            // Включаем лоадер заранее (он пока под черным экраном)
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+
+            // Плавно растворяем экран выбора языка
             document.getElementById('lang-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('lang-screen').style.display = 'none';
-                startAppLoader(); 
+                startAppLoader(); // Только теперь запускаем бегунок процентов
             }, 500);
         }
 
         function startAppLoader() {
-            const loader = document.getElementById('loader');
-            loader.style.display = 'flex';
-            
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
             const barEl = document.getElementById("loader-bar");
+            const loader = document.getElementById('loader');
             
             const interval = setInterval(() => {
                 percent += 3; 
@@ -514,7 +544,7 @@
                 freeVipTickets = data.free_vip_tickets || 0;
                 const ticketsDisplay = document.getElementById('vip-tickets-display');
                 if (freeVipTickets > 0) {
-                    ticketsDisplay.innerText = currentLang === 'ru' ? `🎟 Бесплатных VIP-купонов: ${freeVipTickets}` : `🎟 Free VIP Tickets: ${freeVipTickets}`;
+                    ticketsDisplay.innerText = currentLang === 'ru' ? `🎟 У вас есть ${freeVipTickets} бесплатных купонов на VIP-буст!` : `🎟 You have ${freeVipTickets} free VIP tickets!`;
                     ticketsDisplay.style.display = 'block';
                 } else { ticketsDisplay.style.display = 'none'; }
             } catch (e) { }
@@ -557,7 +587,7 @@
                 
                 if (top.length === 0) return showActionModal(`<h3 style="margin-top:0;">${titleStr}</h3><p style="color:var(--text-dim);">${emptyStr}</p><button class="btn-main" onclick="closeActionModal()">${_t('ok')}</button>`);
                 const html = top.map((t, index) => {
-                    let rank = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<b style="color:var(--text-dim)">${index + 1}</b>`;
+                    let rank = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<b style="color:var(--text-dim)">${index + 1}.</b>`;
                     return `<div style="background:rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); padding:12px 16px; border-radius:16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:12px;"><div style="font-size:22px; width:25px; text-align:center;">${rank}</div><div style="font-weight:700; font-size:15px; word-break: break-all;">${t.username}</div></div><div style="text-align:right;"><div style="color:var(--accent-color); font-weight:800; font-size:16px;">${t.total_tons} TON</div><div style="color:var(--text-dim); font-size:11px; text-transform:uppercase; margin-top:2px;">${salesStr} ${t.sales_count}</div></div></div>`;
                 }).join('');
                 showActionModal(`<h3 style="margin-top:0; margin-bottom:20px; font-size:20px;">${titleStr}</h3><div class="history-container" style="max-height:55vh; overflow-y:auto; padding-right:5px; margin-bottom:15px; text-align:left;">${html}</div><button class="btn-main" onclick="closeActionModal()">${_t('ok')}</button>`);
@@ -1041,6 +1071,7 @@
         async function submitWithdraw() {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const wallet = document.getElementById('withdraw-wallet').value;
+            const available = parseFloat(document.getElementById('avail-balance').innerText);
             if (isNaN(amount) || amount <= 0 || !wallet) return showNotification(_t('error'), "error");
             closeActionModal();
             try {
@@ -1110,10 +1141,7 @@
             document.getElementById('confirm-tag').innerText = tag; document.getElementById('confirm-price').innerText = price;
             document.getElementById('modal-step-1').style.display = 'block'; document.getElementById('modal-step-2').style.display = 'none'; document.getElementById('modal-step-3').style.display = 'none';
             document.getElementById('dynamic-confirm-btn').onclick = confirmAndSend;
-            
-            // Динамический перевод кнопок в HTML модалке
             document.getElementById('dynamic-confirm-btn').innerText = currentLang === 'en' ? 'List and Start Timer' : 'Выставить и начать таймер';
-            
             document.getElementById('custom-modal').style.display = 'flex';
         }
 
@@ -1136,10 +1164,7 @@
             document.getElementById('confirm-tag').innerText = tag; document.getElementById('confirm-price').innerText = price;
             document.getElementById('modal-step-1').style.display = 'block'; document.getElementById('modal-step-2').style.display = 'none'; document.getElementById('modal-step-3').style.display = 'none';
             document.getElementById('dynamic-confirm-btn').onclick = () => confirmAndSendAuction(tag, price, duration);
-            
-            // Динамический перевод кнопок в HTML модалке
             document.getElementById('dynamic-confirm-btn').innerText = currentLang === 'en' ? 'Start Auction' : 'Выставить на аукцион';
-            
             document.getElementById('custom-modal').style.display = 'flex';
         }
 
@@ -1185,8 +1210,6 @@
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; clearInterval(timerInterval); clearInterval(statusInterval); }
         function closeModalAndRefresh() { closeModal(); fetchLots(); fetchAuctions(); if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); }
 
-        // ЗАГЛУШКА НА СТАРТ - Данные загрузятся только после выбора языка
-        setInterval(() => { if (document.getElementById('lang-screen').style.display === 'none') { fetchLots(); fetchAuctions(); } }, 15000);
     </script>
 </body>
 </html>
