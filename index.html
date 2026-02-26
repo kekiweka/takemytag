@@ -22,49 +22,22 @@
             --error: #ef4444;
             --premium-color: #8b5cf6; 
             
-            /* Glassmorphism Variables */
             --glass-bg: rgba(255, 255, 255, 0.04);
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-blur: 24px;
         }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 16px;
-            padding-bottom: 80px; 
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; padding-bottom: 80px; min-height: 100vh; overflow-x: hidden; position: relative; }
 
-        /* 💡 Анимированный фон (Aurora) */
-        .bg-mesh {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -2; overflow: hidden; background: #050505;
-        }
-        .bg-blob-1, .bg-blob-2 {
-            position: absolute; border-radius: 50%; filter: blur(90px);
-            animation: float 20s infinite alternate ease-in-out;
-        }
+        .bg-mesh { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; overflow: hidden; background: #050505; }
+        .bg-blob-1, .bg-blob-2 { position: absolute; border-radius: 50%; filter: blur(90px); animation: float 20s infinite alternate ease-in-out; }
         .bg-blob-1 { width: 60vw; height: 60vw; background: rgba(139, 92, 246, 0.35); top: -10%; left: -20%; }
         .bg-blob-2 { width: 70vw; height: 70vw; background: rgba(56, 189, 248, 0.25); bottom: -20%; right: -20%; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(15vw, 15vh) scale(1.1); } }
 
-        /* 💡 Текстура шума */
-        .bg-noise {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -1; opacity: 0.3; pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
+        .bg-noise { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.3; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
 
-        /* 💡 Glassmorphism Карточки */
-        .glass-card {
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, box-shadow 0.2s ease; }
 
         .balance-card { padding: 20px; text-align: center; margin-bottom: 24px; }
         .input-box { padding: 20px; margin-bottom: 24px; }
@@ -73,21 +46,13 @@
         .balance-label { color: var(--text-dim); font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;}
         .balance-value { font-size: 32px; font-weight: 800; color: #fff; margin-top: 5px; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
         
-        input, select { 
-            width: 100%; padding: 16px; margin-bottom: 12px; 
-            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
-            border-radius: 16px; color: white; font-family: 'Montserrat', sans-serif; 
-            font-size: 15px; box-sizing: border-box; outline: none; transition: 0.3s; 
-        }
+        input, select { width: 100%; padding: 16px; margin-bottom: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 16px; color: white; font-family: 'Montserrat', sans-serif; font-size: 15px; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus, select:focus { border-color: var(--accent-color); background: rgba(0,0,0,0.5); }
         
         button { font-family: 'Montserrat', sans-serif; outline: none; transition: all 0.2s ease; cursor: pointer; }
         button:active { transform: scale(0.96); }
 
-        .btn-main { 
-            background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border: none; 
-            padding: 16px; border-radius: 16px; width: 100%; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); 
-        }
+        .btn-main { background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
         .btn-small { padding: 12px; font-size: 13px; border-radius: 12px; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-left: 5px; letter-spacing: -0.5px;}
         
@@ -127,55 +92,28 @@
         .history-container::-webkit-scrollbar { width: 4px; }
         .history-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
-        /* ЭКРАН ВЫБОРА ЯЗЫКА */
-        #lang-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.8); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease;
-        }
-        .lang-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-            padding: 20px 40px; font-size: 18px; font-weight: 700; color: white;
-            margin-bottom: 15px; width: 80%; max-width: 300px; text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2); font-family: 'Montserrat', sans-serif; cursor: pointer;
-            transition: 0.3s;
-        }
+        #lang-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.8); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
+        .lang-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px 40px; font-size: 18px; font-weight: 700; color: white; margin-bottom: 15px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); font-family: 'Montserrat', sans-serif; cursor: pointer; transition: 0.3s; }
         .lang-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
 
-        /* ИДЕАЛЬНЫЙ ЛОАДЕР С ЛЕТАЮЩИМИ ТЕГАМИ (3D Эффект) */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505; z-index: 15000; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease; overflow: hidden;
-        }
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 15000; display: none; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; overflow: hidden; }
         .loader-logo { width: 120px; height: 120px; border-radius: 25px; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); margin-bottom: 25px; object-fit: cover; position: relative; z-index: 10; }
         .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; z-index: 10;}
         .loader-bar { height: 100%; width: 0%; background: var(--accent-color); border-radius: 10px; box-shadow: 0 0 10px var(--accent-color); transition: width 0.1s linear; }
         
-        .floating-tag {
-            position: absolute; font-weight: 800; white-space: nowrap; pointer-events: none;
-            z-index: 1; user-select: none;
-            color: rgba(255, 255, 255, 0.1); /* Полупрозрачный цвет */
-            animation: floatUp linear infinite;
-        }
+        .floating-tag { position: absolute; font-weight: 800; white-space: nowrap; pointer-events: none; z-index: 1; user-select: none; color: rgba(255, 255, 255, 0.1); animation: floatUp linear infinite; }
         .glow-blue { color: rgba(56, 189, 248, 0.15); text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
         .glow-purple { color: rgba(139, 92, 246, 0.15); text-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
 
-        @keyframes floatUp {
-            0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-30vh) scale(1.1); opacity: 0; }
-        }
+        @keyframes floatUp { 0% { transform: translateY(110vh) scale(0.8); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-30vh) scale(1.1); opacity: 0; } }
 
-        /* 💡 Анимация для FOMO-бейджа */
-        @keyframes fomoPulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
+        @keyframes fomoPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        
+        /* 💡 Стили для бейджа лояльности */
+        .loyalty-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-top: 5px; }
+        .bronze { background: linear-gradient(135deg, #b45309, #78350f); color: white; box-shadow: 0 2px 10px rgba(180, 83, 9, 0.3); }
+        .silver { background: linear-gradient(135deg, #94a3b8, #475569); color: white; box-shadow: 0 2px 10px rgba(148, 163, 184, 0.3); }
+        .gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: black; box-shadow: 0 2px 10px rgba(251, 191, 36, 0.4); }
     </style>
 </head>
 <body>
@@ -204,7 +142,6 @@
         <div class="floating-tag" style="left: 85%; animation-duration: 12s; animation-delay: -3s; font-size: 20px; filter: blur(2px);">@family</div>
         <div class="floating-tag" style="left: 5%; animation-duration: 15s; animation-delay: -11s; font-size: 30px;">@fragment</div>
         <div class="floating-tag glow-blue" style="left: 50%; animation-duration: 14s; animation-delay: -6s; font-size: 24px; filter: blur(1px);">@market</div>
-        
         <div style="z-index: 10; display: flex; flex-direction: column; align-items: center; position: relative;">
             <img src="logo.jpg" alt="Logo" class="loader-logo">
             <div style="font-size: 26px; font-weight: 800; margin-bottom: 25px; letter-spacing: 1px; color: white; text-shadow: 0 0 15px rgba(0,0,0,0.5);">TakeMyTag</div>
@@ -227,6 +164,12 @@
             <div class="section-title" style="margin-top: 0;" data-ru="💎 Продать юзернейм" data-en="💎 Sell Username">💎 Продать юзернейм</div>
             <input type="text" id="username-input" placeholder="Например: tag_name" data-ru="Например: tag_name" data-en="Example: tag_name">
             <input type="number" id="price-input" placeholder="Цена в TON" data-ru="Цена в TON" data-en="Price in TON">
+            
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dim); margin-bottom: 15px; cursor: pointer;">
+                <input type="checkbox" id="is-private-checkbox" style="width: 20px; height: 20px; margin: 0;"> 
+                <span data-ru="🕵️‍♂️ Скрытая сделка (без витрины)" data-en="🕵️‍♂️ Hidden deal (off-market)">🕵️‍♂️ Скрытая сделка (без витрины)</span>
+            </label>
+
             <div id="price-calc-hint" style="color: var(--warning); font-size: 13px; margin-top: -5px; margin-bottom: 12px; display: none; text-align: right; font-weight: 600;"></div>
             <button class="btn-main" onclick="openConfirmModal()" data-ru="Выставить на маркет" data-en="List on Market">Выставить на маркет</button>
         </div>
@@ -265,10 +208,23 @@
         <div id="auctions-container"></div>
     </div>
 
+    <div id="tab-wtb" class="tab-content">
+        <div class="input-box glass-card">
+            <div class="section-title" style="margin-top: 0;" data-ru="📢 Оставить заявку (WTB)" data-en="📢 Request to Buy (WTB)">📢 Оставить заявку (WTB)</div>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-10px;" data-ru="Напишите, какой тег вы ищете, и продавцы предложат вам варианты." data-en="Describe the tag you want, sellers will offer it.">Напишите, какой тег вы ищете, и продавцы предложат вам варианты.</p>
+            <input type="text" id="wtb-desc-input" placeholder="Кого ищете? (например, 4 буквы)" data-ru="Кого ищете? (например, 4 буквы)" data-en="What are you looking for?">
+            <input type="number" id="wtb-budget-input" placeholder="Бюджет (TON)" data-ru="Бюджет (TON)" data-en="Budget (TON)">
+            <button class="btn-main" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="submitWTB()" data-ru="Опубликовать заявку" data-en="Publish Request">Опубликовать заявку</button>
+        </div>
+        <div class="section-title" style="margin:0 0 12px 0;" data-ru="👀 Ищут прямо сейчас" data-en="👀 Looking to buy">👀 Ищут прямо сейчас</div>
+        <div id="wtb-container"></div>
+    </div>
+
     <div id="tab-profile" class="tab-content">
         <div class="balance-card glass-card" style="text-align: left;">
-            <div class="balance-label" id="profile-name" style="text-align: center; margin-bottom: 20px; font-size: 16px; color: white; display:flex; align-items:center; justify-content:center; gap:6px;">
-                Профиль загружается...
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="balance-label" id="profile-name" style="font-size: 16px; color: white; display:flex; align-items:center; justify-content:center; gap:6px;">Профиль загружается...</div>
+                <div id="loyalty-badge" class="loyalty-badge bronze" style="display:none;">Уровень загружается...</div>
             </div>
             
             <div style="display: flex; justify-content: space-between; text-align: center; margin-bottom: 15px; gap:10px;">
@@ -285,10 +241,12 @@
             <div style="background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 16px; margin-bottom: 15px; text-align: center; border: 1px dashed rgba(56, 189, 248, 0.3);">
                 <div style="font-size: 11px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 5px; font-weight:700;" data-ru="Заработано на рефералах" data-en="Referral Earnings">Заработано на рефералах</div>
                 <div style="font-size: 22px; font-weight: 800; color: white;" id="ref-earnings">0.00 TON</div>
-                <button class="btn-main btn-small" style="margin-top: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: white;" onclick="copyRefLink()" data-ru="🔗 Пригласить друга (1% с покупок)" data-en="🔗 Invite Friend (1%)">🔗 Пригласить друга (1% с покупок)</button>
+                <button class="btn-main btn-small" id="ref-btn" style="margin-top: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: white;" onclick="copyRefLink()" data-ru="🔗 Пригласить друга (1%)" data-en="🔗 Invite Friend (1%)">🔗 Пригласить друга (1%)</button>
             </div>
 
             <div id="vip-tickets-display" style="display:none; text-align:center; font-size:13px; font-weight:600; color:var(--success); margin-bottom:15px; background:rgba(16,185,129,0.1); padding:10px; border-radius:12px; border: 1px solid rgba(16,185,129,0.3);"></div>
+
+            <button class="btn-main btn-small" style="background: linear-gradient(135deg, #ec4899, #f43f5e); color: white; font-size: 14px; margin-bottom: 10px; font-weight: 800;" onclick="openRadarMenu()" data-ru="📡 Умный Радар" data-en="📡 Smart Radar">📡 Умный Радар</button>
 
             <button class="btn-main btn-small" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; font-size: 14px; margin-bottom: 10px; font-weight: 800;" onclick="openLeaderboardModal()" data-ru="🏆 Топ продавцов" data-en="🏆 Top Sellers">🏆 Топ продавцов</button>
 
@@ -300,7 +258,6 @@
                 <button class="btn-main btn-small" style="background: transparent; border: 1px dashed var(--glass-border); flex: 1 1 100%; color: var(--text-dim);" onclick="openPromoModal()" data-ru="🎁 Ввести промокод" data-en="🎁 Enter Promo">🎁 Ввести промокод</button>
             </div>
         </div>
-        
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
             <div class="section-title" style="margin:0;" data-ru="Списки" data-en="Lists">Списки</div>
             <select id="profile-filter-select" onchange="renderProfile()" style="width:145px; margin:0; padding:12px 12px; font-size: 13px;">
@@ -313,44 +270,37 @@
                 <option value="old" data-ru="Сначала старые" data-en="Oldest First">Сначала старые</option>
             </select>
         </div>
-
         <div id="profile-list"></div>
     </div>
 
     <div id="tab-info" class="tab-content">
         <div class="input-box glass-card" style="line-height: 1.7; color: var(--text-dim); font-size: 14px;">
             <h2 style="color: white; margin-top: 0; font-weight: 800; font-size: 22px;" data-ru="ℹ️ Информация" data-en="ℹ️ Information">ℹ️ Информация</h2>
-            
             <p data-ru='<b style="color:white;">Как продать юзернейм?</b><br>1. Введите тег и цену в разделе Маркет.<br>2. Нажмите "Выставить".<br>3. Передайте права владельца нашему боту <b style="color:var(--accent-color);">@TakeMyTag1</b> в течение 5 минут.' 
                data-en='<b style="color:white;">How to sell a username?</b><br>1. Enter tag and price in Market.<br>2. Click "List".<br>3. Transfer ownership to <b style="color:var(--accent-color);">@TakeMyTag1</b> within 5 minutes.'>
                <b style="color:white;">Как продать юзернейм?</b><br>1. Введите тег и цену в разделе Маркет.<br>2. Нажмите "Выставить".<br>3. Передайте права владельца нашему боту <b style="color:var(--accent-color);">@TakeMyTag1</b> в течение 5 минут.
             </p>
             <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-            
             <p data-ru='<b style="color:white;">Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">3.5%</b> от суммы сделки.' 
                data-en='<b style="color:white;">Market Fee:</b><br>System takes only <b style="color: var(--accent-color);">3.5%</b> of a successful deal.'>
                <b style="color:white;">Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">3.5%</b> от суммы сделки.
             </p>
             <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-
             <p data-ru='<b style="color:white;">📢 Live-канал сделок:</b><br>Смотрите реальные покупки и отзывы в нашем <a href="https://t.me/TakeMyTag_Sales" style="color:var(--accent-color); font-weight:bold; text-decoration:none;">Официальном канале</a>.' 
                data-en='<b style="color:white;">📢 Live Sales Channel:</b><br>Watch real purchases and reviews in our <a href="https://t.me/TakeMyTag_Sales" style="color:var(--accent-color); font-weight:bold; text-decoration:none;">Official Channel</a>.'>
                <b style="color:white;">📢 Live-канал сделок:</b><br>Смотрите реальные покупки и отзывы в нашем <a href="https://t.me/TakeMyTag_Sales" style="color:var(--accent-color); font-weight:bold; text-decoration:none;">Официальном канале</a>.
             </p>
             <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-            
             <p data-ru='<b style="color:white;">Избранное:</b><br>Нажимайте 🤍 на витрине, чтобы отложить тег и быстро найти его в профиле во вкладке "Избранное".' 
                data-en='<b style="color:white;">Favorites:</b><br>Click heart icon 🤍 to save items for later in your Profile tab.'>
                <b style="color:white;">Избранное:</b><br>Нажимайте 🤍 на витрине, чтобы отложить тег и быстро найти его в профиле во вкладке "Избранное".
             </p>
             <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-            
             <p data-ru='<b style="color:white;">Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b style="color:var(--success);">1%</b> с каждой их покупки в маркете или на аукционе!' 
                data-en='<b style="color:white;">Referral System:</b><br>Invite friends via link and get <b style="color:var(--success);">1%</b> from every purchase they make!'>
                <b style="color:white;">Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b style="color:var(--success);">1%</b> с каждой их покупки в маркете или на аукционе!
             </p>
             <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-            
             <p data-ru='<b style="color:white;">Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет с помощью официальных Telegram Stars.' 
                data-en='<b style="color:white;">Deposit Stars ⭐️:</b><br>You can deposit funds using official Telegram Stars.'>
                <b style="color:white;">Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет с помощью официальных Telegram Stars.
@@ -366,7 +316,6 @@
                 Загрузка...
             </div>
         </div>
-
         <div class="input-box glass-card">
             <h3 style="margin-top:0; display:flex; justify-content:space-between; align-items:center;">
                 <span data-ru="💸 Заявки на вывод" data-en="💸 Withdraw Requests">💸 Заявки на вывод</span>
@@ -374,20 +323,17 @@
             </h3>
             <div id="admin-withdrawals" style="max-height: 250px; overflow-y: auto; padding-right:5px;" data-ru="Нет заявок" data-en="No requests">Нет заявок</div>
         </div>
-
         <div class="input-box glass-card">
             <h3 style="margin-top:0;" data-ru="💰 Выдать баланс (TON)" data-en="💰 Add Balance (TON)">💰 Выдать баланс (TON)</h3>
             <input type="number" id="admin-bal-id" placeholder="Telegram ID">
             <input type="number" id="admin-bal-amount" placeholder="Сумма (TON)" data-ru="Сумма (TON)" data-en="Amount (TON)">
             <button class="btn-main" onclick="adminAddBalance()" data-ru="Выдать баланс" data-en="Add Balance">Выдать баланс</button>
         </div>
-
         <div class="input-box glass-card">
             <h3 style="margin-top:0;" data-ru="✅ Выдать верификацию" data-en="✅ Verify User">✅ Выдать верификацию</h3>
             <input type="number" id="admin-ver-id" placeholder="Telegram ID">
             <button class="btn-main" style="background:var(--premium-color);" onclick="adminVerify()" data-ru="Выдать галочку" data-en="Verify">Выдать галочку</button>
         </div>
-
         <div class="input-box glass-card">
             <h3 style="margin-top:0;" data-ru="🎁 Создать промокод" data-en="🎁 Create Promo">🎁 Создать промокод</h3>
             <input type="text" id="admin-promo-code" placeholder="Код (MEGA2026)" style="text-transform: uppercase;">
@@ -399,7 +345,8 @@
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('market', this)"><span class="nav-icon">🛒</span><span data-ru="Маркет" data-en="Market">Маркет</span></div>
-        <div class="nav-item" onclick="switchTab('auctions', this)"><span class="nav-icon">⏳</span><span data-ru="Аукционы" data-en="Auctions">Аукционы</span></div>
+        <div class="nav-item" onclick="switchTab('auctions', this)"><span class="nav-icon">⏳</span><span data-ru="Торги" data-en="Auctions">Торги</span></div>
+        <div class="nav-item" onclick="switchTab('wtb', this)"><span class="nav-icon">📢</span><span data-ru="Заявки" data-en="WTB">Заявки</span></div>
         <div class="nav-item" onclick="switchTab('profile', this)"><span class="nav-icon">👤</span><span data-ru="Профиль" data-en="Profile">Профиль</span></div>
         <div class="nav-item" onclick="switchTab('info', this)"><span class="nav-icon">ℹ️</span><span data-ru="Инфо" data-en="Info">Инфо</span></div>
         <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchTab('admin', this)"><span class="nav-icon">🛠</span><span data-ru="Админ" data-en="Admin">Админ</span></div>
@@ -415,7 +362,7 @@
                     <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; text-align:center; font-weight:bold; color:#38bdf8; font-size: 16px; border: 1px dashed #38bdf8;">
                         @TakeMyTag1
                     </div>
-                    <p style="font-size:11px; color:var(--text-dim); margin-top:12px;" data-ru="🛡️ Юзербот автоматически выставит лот на витрину." data-en="🛡️ The bot will automatically list your item.">🛡️ Юзербот автоматически выставит лот на витрину.</p>
+                    <p style="font-size:11px; color:var(--text-dim); margin-top:12px;" data-ru="🛡️ Юзербот автоматически выставит лот." data-en="🛡️ The bot will automatically list your item.">🛡️ Юзербот автоматически выставит лот.</p>
                 </div>
                 <button class="btn-main" id="dynamic-confirm-btn" style="margin-top: 25px;">Выставить и начать таймер</button>
                 <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); margin-top:15px; cursor:pointer; font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; width: 100%;" data-ru="Отмена" data-en="Cancel">Отмена</button>
@@ -429,7 +376,7 @@
             <div id="modal-step-3" style="display: none;">
                 <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
                 <h2 style="margin-top:0; font-size: 22px; color: #10b981;" data-ru="Успешно выставлен!" data-en="Listed Successfully!">Успешно выставлен!</h2>
-                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5;" data-ru="Ваш юзернейм появился на витрине.<br><br>Мы уже отправили уведомление в бота!" data-en="Your username is on the showcase.<br><br>We sent a notification to the bot!">Ваш юзернейм появился на витрине.<br><br>Мы уже отправили уведомление в бота!</p>
+                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5;" data-ru="Бот прислал уведомление!" data-en="We sent a notification to the bot!">Бот прислал уведомление!</p>
                 <button class="btn-main" style="margin-top: 15px;" onclick="closeModalAndRefresh()" data-ru="Отлично" data-en="Great">Отлично</button>
             </div>
         </div>
@@ -483,7 +430,8 @@
             'connect_wallet': {ru: 'Подключите кошелек 💳', en: 'Connect Wallet 💳'},
             'connected': {ru: 'Подключен ✅', en: 'Connected ✅'},
             'cancel': {ru: 'Отмена', en: 'Cancel'},
-            'ok': {ru: 'Закрыть', en: 'Close'}
+            'ok': {ru: 'Закрыть', en: 'Close'},
+            'radar_btn': {ru: '📡 Умный Радар', en: '📡 Smart Radar'}
         };
         function _t(key) { return _dict[key] ? _dict[key][currentLang] : key; }
 
@@ -500,7 +448,6 @@
         function selectLanguage(lang) {
             currentLang = lang;
             updateStaticTexts();
-            
             const loader = document.getElementById('loader');
             loader.style.display = 'flex';
             loader.style.opacity = '1';
@@ -536,6 +483,7 @@
                 fetchUserData(); 
                 fetchLots(); 
                 fetchAuctions(); 
+                fetchWTB(); // Грузим заявки WTB
                 if (user.id === ADMIN_ID) {
                     document.getElementById('nav-admin').style.display = 'block';
                     loadAdminStats();
@@ -558,6 +506,7 @@
         renderSkeletons('lots-container', 4);
         renderSkeletons('profile-list', 2);
         renderSkeletons('auctions-container', 2);
+        renderSkeletons('wtb-container', 2);
 
         document.getElementById('price-input').addEventListener('input', function() {
             const val = parseFloat(this.value);
@@ -595,6 +544,9 @@
             document.getElementById('wallet-status').style.color = wallet ? "var(--success)" : "var(--text-main)";
         });
 
+        // 💡 ГЛОБАЛЬНЫЙ ОБЪЕКТ ЮЗЕРА (ДЛЯ РАДАРА)
+        let currentUserData = null;
+
         async function fetchUserData() {
             if (!user) return;
             const startParam = tg.initDataUnsafe?.start_param || "";
@@ -603,11 +555,28 @@
             try {
                 const res = await fetch(refId ? `${API_URL}/users/${user.id}?ref_id=${refId}` : `${API_URL}/users/${user.id}`, { headers });
                 const data = await res.json();
+                currentUserData = data; // Сохраняем для радара
+                
                 const verifiedIcon = data.is_verified ? svgCheckmark : '';
                 document.getElementById('profile-name').innerHTML = `Привет, ${user.first_name}! ${verifiedIcon}`;
                 document.getElementById('avail-balance').innerText = `${data.available_balance.toFixed(2)} TON`;
                 document.getElementById('froz-balance').innerText = `${data.frozen_balance.toFixed(2)} TON`;
                 if(document.getElementById('ref-earnings')) document.getElementById('ref-earnings').innerText = `${(data.ref_earnings || 0).toFixed(2)} TON`;
+
+                // 💡 ОТРИСОВКА БЕЙДЖА ЛОЯЛЬНОСТИ
+                const loyaltyBadge = document.getElementById('loyalty-badge');
+                if (data.loyalty_level === "Бронза") { loyaltyBadge.className = "loyalty-badge bronze"; }
+                else if (data.loyalty_level === "Серебро") { loyaltyBadge.className = "loyalty-badge silver"; }
+                else { loyaltyBadge.className = "loyalty-badge gold"; }
+                
+                let lvlText = data.loyalty_level;
+                if (currentLang === 'en') {
+                    if(lvlText==="Бронза") lvlText="Bronze";
+                    if(lvlText==="Серебро") lvlText="Silver";
+                    if(lvlText==="Золото") lvlText="Gold";
+                }
+                loyaltyBadge.innerText = `${lvlText} (${data.loyalty_percent}%)`;
+                loyaltyBadge.style.display = 'inline-block';
 
                 freeVipTickets = data.free_vip_tickets || 0;
                 const ticketsDisplay = document.getElementById('vip-tickets-display');
@@ -615,6 +584,10 @@
                     ticketsDisplay.innerText = currentLang === 'ru' ? `🎟 У вас есть ${freeVipTickets} бесплатных купонов на VIP-буст!` : `🎟 You have ${freeVipTickets} free VIP tickets!`;
                     ticketsDisplay.style.display = 'block';
                 } else { ticketsDisplay.style.display = 'none'; }
+                
+                // Кнопка рефералов с процентом
+                document.getElementById('ref-btn').innerText = currentLang === 'ru' ? `🔗 Пригласить друга (${data.loyalty_percent}%)` : `🔗 Invite Friend (${data.loyalty_percent}%)`;
+                
             } catch (e) { }
         }
 
@@ -635,6 +608,123 @@
                 renderAuctions();
             } catch (e) { }
         }
+
+        // 💡 НОВОЕ: ЗАГРУЗКА БИРЖИ WTB
+        async function fetchWTB() {
+            try {
+                const res = await fetch(`${API_URL}/wtb`, { headers });
+                const wtbs = await res.json();
+                const container = document.getElementById('wtb-container');
+                if(wtbs.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;color:var(--text-dim);margin-top:20px;">${_t('nothing')}</div>`;
+                    return;
+                }
+                container.innerHTML = wtbs.map(w => {
+                    const verifiedBadge = w.is_verified ? svgCheckmark : '';
+                    let btnStr = currentLang === 'en' ? 'Offer tag' : 'Предложить тег';
+                    return `
+                    <div class="lot-item glass-card" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                        <div style="font-size:14px; color: white; line-height: 1.5;">${w.description}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px; margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                            <div><div style="font-size:11px; color:var(--text-dim);">Бюджет:</div><div style="color:var(--success); font-weight:800; font-size:16px;">${w.budget} TON</div></div>
+                            <div style="font-size:11px; color:var(--text-dim);">От: ID${w.buyer_id} ${verifiedBadge}</div>
+                            <button class="buy-btn" style="background:#8b5cf6;" onclick="tg.openTelegramLink('https://t.me/TakeMyTag_bot')">${btnStr}</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) { }
+        }
+
+        async function submitWTB() {
+            const desc = document.getElementById('wtb-desc-input').value.trim();
+            const budget = parseFloat(document.getElementById('wtb-budget-input').value);
+            if (!desc || isNaN(budget) || budget <= 0) return showNotification(_t('error'), "error");
+            
+            showActionModal(`<h3>${_t('loading')}</h3>`);
+            try {
+                const res = await fetch(`${API_URL}/wtb`, { 
+                    method: 'POST', headers, 
+                    body: JSON.stringify({ buyer_id: user.id, description: desc, budget: budget }) 
+                });
+                if (res.ok) { 
+                    showNotification(_t('success'), "success"); 
+                    closeActionModal(); 
+                    document.getElementById('wtb-desc-input').value = '';
+                    document.getElementById('wtb-budget-input').value = '';
+                    fetchWTB();
+                } else { showNotification(_t('error'), "error"); closeActionModal(); }
+            } catch (e) { showNotification(_t('error'), "error"); closeActionModal(); }
+        }
+
+        // 💡 НОВОЕ: ЛОГИКА РАДАРА
+        async function openRadarMenu() {
+            if (!currentUserData) return;
+            let titleStr = currentLang === 'en' ? `📡 Smart Radar` : `📡 Умный Радар`;
+            
+            if (!currentUserData.has_radar) {
+                let descStr = currentLang === 'en' ? `Get instant notifications when a tag matching your criteria appears! Price: 1.5 TON.` : `Бот пришлет вам пуш-уведомление, как только на маркете появится тег, который вы ищете!<br><br>Стоимость навсегда: <b>1.5 TON</b>`;
+                let btnStr = currentLang === 'en' ? `Buy Radar` : `Купить Радар`;
+                showActionModal(`
+                    <h3 style="margin-top:0; color:#ec4899;">${titleStr}</h3>
+                    <p style="font-size:13px; color:var(--text-dim); line-height: 1.5; margin-bottom:20px;">${descStr}</p>
+                    <div class="flex-btns">
+                        <button class="btn-cancel" onclick="closeActionModal()">${_t('cancel')}</button>
+                        <button class="btn-confirm" style="background:linear-gradient(135deg, #ec4899, #f43f5e);" onclick="buyRadar()">${btnStr}</button>
+                    </div>
+                `);
+            } else {
+                showActionModal(`<h3>${_t('loading')}</h3>`);
+                try {
+                    const res = await fetch(`${API_URL}/users/${user.id}/radar`, {headers});
+                    const cfg = await res.json();
+                    let saveStr = currentLang === 'en' ? `Save Config` : `Сохранить фильтры`;
+                    let descStr = currentLang === 'en' ? `Leave empty if you don't care.` : `Оставьте поля пустыми, если параметр не важен.`;
+                    
+                    showActionModal(`
+                        <h3 style="margin-top:0; color:#ec4899;">${titleStr}</h3>
+                        <p style="font-size:12px; color:var(--text-dim);">${descStr}</p>
+                        <input type="number" id="radar-price" placeholder="Макс. цена (TON)" value="${cfg.max_price || ''}">
+                        <input type="number" id="radar-len" placeholder="Макс. длина (букв)" value="${cfg.max_length || ''}">
+                        <input type="text" id="radar-word" placeholder="Содержит слово (например, crypto)" value="${cfg.keyword || ''}">
+                        <div class="flex-btns">
+                            <button class="btn-cancel" onclick="closeActionModal()">${_t('cancel')}</button>
+                            <button class="btn-confirm" style="background:linear-gradient(135deg, #ec4899, #f43f5e);" onclick="saveRadarConfig()">${saveStr}</button>
+                        </div>
+                    `);
+                } catch(e) { closeActionModal(); }
+            }
+        }
+
+        async function buyRadar() {
+            closeActionModal();
+            try {
+                const res = await fetch(`${API_URL}/users/${user.id}/radar/buy`, { method: 'POST', headers });
+                if (res.ok) { showNotification(_t('success'), "success"); fetchUserData(); openRadarMenu(); } 
+                else { showNotification(_t('error'), "error"); }
+            } catch(e) { showNotification(_t('error'), "error"); }
+        }
+
+        async function saveRadarConfig() {
+            let price = parseFloat(document.getElementById('radar-price').value);
+            let length = parseInt(document.getElementById('radar-len').value);
+            let keyword = document.getElementById('radar-word').value.trim();
+            
+            closeActionModal();
+            try {
+                const res = await fetch(`${API_URL}/users/${user.id}/radar/config`, { 
+                    method: 'POST', headers, 
+                    body: JSON.stringify({ 
+                        user_id: user.id, 
+                        max_price: isNaN(price) ? null : price, 
+                        max_length: isNaN(length) ? null : length, 
+                        keyword: keyword || null 
+                    }) 
+                });
+                if (res.ok) { showNotification(_t('success'), "success"); } 
+                else { showNotification(_t('error'), "error"); }
+            } catch(e) { showNotification(_t('error'), "error"); }
+        }
+
 
         async function toggleFavorite(lotId) {
             if (!user) return showNotification(currentLang === 'en' ? "Login required!" : "Авторизуйтесь!", "error");
@@ -735,11 +825,8 @@
             tg.openTelegramLink(tgShareLink);
         }
 
-        // 💡 ИЗМЕНЕНО: ДЕТАЛЬНАЯ СТРАНИЦА ЛОТА С ИСТОРИЕЙ И FOMO
         async function openPreviewModal(lotId, tag, price) {
-            // Увеличиваем просмотры
             fetch(`${API_URL}/lots/${lotId}/view`, { method: 'POST', headers }); 
-            
             showActionModal(`<h3>${_t('loading')}</h3>`);
             
             try {
@@ -752,30 +839,23 @@
                 let time = currentLang === 'en' ? 'Instant' : 'Мгновенно';
                 let btn = currentLang === 'en' ? 'Proceed to Payment' : 'Перейти к оплате';
                 
-                // 💡 Эффект FOMO (Сколько человек лайкнуло лот)
                 let fomoHtml = '';
                 if (data.favorites_count > 0) {
                     let fomoText = currentLang === 'en' 
                         ? `❤️ Favorited by <b>${data.favorites_count}</b> people (Hurry up!)` 
                         : `❤️ В избранном у <b>${data.favorites_count}</b> чел. (Успей забрать!)`;
-                    fomoHtml = `
-                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 10px; border-radius: 12px; font-size: 12px; margin-bottom: 15px; font-weight: 600; animation: fomoPulse 2s infinite;">
-                        ${fomoText}
-                    </div>`;
+                    fomoHtml = `<div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 10px; border-radius: 12px; font-size: 12px; margin-bottom: 15px; font-weight: 600; animation: fomoPulse 2s infinite;">${fomoText}</div>`;
                 }
 
                 showActionModal(`
                     <div style="text-align: center;">
                         <div style="font-size: 45px; margin-bottom: 5px;">💎</div>
                         <h3 style="margin-top:0; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${title}</h3>
-                        
                         <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; margin-bottom: 15px;">
                             <h2 style="margin:0 0 5px 0; font-size: 26px; color: white; word-break: break-all;">@${tag}</h2>
                             <div style="font-size: 24px; font-weight: 800; color: var(--accent-color);">${price} TON</div>
                         </div>
-                        
                         ${fomoHtml}
-
                         <div style="text-align: left; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1; line-height: 1.8;">
                             <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>✅ <b>Status:</b></span> <span style="color:var(--success); font-weight:bold;">${status}</span></div>
                             <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>🛡 <b>Guarantor:</b></span> <span>${guarantor}</span></div>
@@ -783,7 +863,6 @@
                             <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
                             <div style="display:flex; justify-content:space-between;"><span>👁 <b>Views:</b></span> <span>${data.views || 0}</span></div>
                         </div>
-
                         <div class="flex-btns" style="flex-direction: column; gap: 10px;">
                             <button class="btn-main" style="padding: 16px; font-size: 16px;" onclick="openBuyModal(${lotId}, ${price}, '${tag}')">${btn}</button>
                             <button class="btn-cancel" onclick="closeActionModal()">${_t('cancel')}</button>
@@ -804,6 +883,14 @@
                 const targetLotId = parseInt(startParam.replace('lot_', ''));
                 const targetLot = allLots.find(l => l.id === targetLotId);
                 if (targetLot) { openPreviewModal(targetLot.id, targetLot.target_username, targetLot.price); startParamProcessed = true; }
+            }
+            // 💡 НОВОЕ: ЕСЛИ ЭТО P2P СДЕЛКА
+            if (startParam && startParam.startsWith('p2p_')) {
+                const targetLotId = parseInt(startParam.replace('p2p_', ''));
+                fetch(`${API_URL}/lots/${targetLotId}/details`, { headers })
+                .then(res => res.json())
+                .then(data => { openPreviewModal(data.id, data.target_username, data.price); startParamProcessed = true; })
+                .catch(e => {});
             }
         }
 
@@ -890,6 +977,12 @@
 
                     if (lot.seller_id === user.id) {
                         holdText = `<br>${_t('hold_after')} <b style="color:var(--warning);">${(lot.price * 0.965).toFixed(2)} TON</b>`;
+                        
+                        // 💡 ЕСЛИ ЛОТ ПРИВАТНЫЙ, ВЫВОДИМ ССЫЛКУ ДЛЯ P2P
+                        if (lot.is_private) {
+                            holdText += `<br><span style="color:#8b5cf6; font-size:11px;">Отправьте эту ссылку покупателю:</span><br><code style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px; user-select:all;">https://t.me/${BOT_USERNAME}/app?startapp=p2p_${lot.id}</code>`;
+                        }
+                        
                         if (lot.status === 'active' || lot.status === 'pending_holder') {
                             let vipBtnText = freeVipTickets > 0 ? `${_t('use_ticket')} (${freeVipTickets})` : _t('boost');
                             let vipButton = lot.is_vip 
@@ -901,8 +994,7 @@
                                     <button class="btn-main btn-small" style="background:rgba(255,255,255,0.1); border:1px solid var(--glass-border); flex:1; min-width: 120px;" onclick="openPriceModal(${lot.id}, '${lot.target_username}')">${_t('change_price')}</button>
                                     ${lot.status === 'active' ? `<button class="btn-main btn-small" style="background:rgba(239, 68, 68, 0.2); color: var(--error); flex:1; min-width: 120px;" onclick="openRecallModal(${lot.id}, '${lot.target_username}')">${_t('recall')}</button>` : ''}
                                 </div>
-                                ${vipButton}
-                            `;
+                                ${lot.is_private ? '' : vipButton} `;
                         }
                     } else {
                         actionButtons = `
@@ -916,13 +1008,14 @@
 
                     const verifiedBadge = lot.seller_is_verified ? svgCheckmark : '';
                     const vipBadge = lot.is_vip ? '<span class="vip-badge" style="margin-left:4px;">🔥 VIP</span>' : '';
+                    const privateBadge = lot.is_private ? '<span style="background:rgba(139, 92, 246, 0.2); color:#8b5cf6; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; margin-left:4px;">P2P</span>' : '';
 
                     return `
                     <div class="input-box glass-card" style="padding:16px; position:relative; overflow:hidden;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap: wrap; gap: 10px;">
                             <div style="display:flex; align-items:center; flex-wrap: wrap; gap:6px;">
                                 <b style="font-size:16px; word-break: break-all;">@${lot.target_username}</b>
-                                <div style="display: flex; align-items: center; flex-shrink: 0;">${verifiedBadge}${vipBadge}</div>
+                                <div style="display: flex; align-items: center; flex-shrink: 0;">${verifiedBadge}${vipBadge}${privateBadge}</div>
                             </div>
                             <span style="font-size:11px; font-weight:700; color:${statusColor}; background:${statusBg}; padding: 4px 8px; border-radius: 8px; white-space: nowrap;">${statusText}</span>
                         </div>
@@ -1232,13 +1325,20 @@
             if(tabId === 'profile') { fetchUserData(); renderProfile(); }
             if(tabId === 'market') fetchLots();
             if(tabId === 'auctions') fetchAuctions();
+            if(tabId === 'wtb') fetchWTB();
         }
 
         function openConfirmModal() {
             const tag = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
+            const isPrivate = document.getElementById('is-private-checkbox').checked; // 💡 Считываем галочку
+            
             if (!tag || !price) return showNotification(_t('error'), "error");
             document.getElementById('confirm-tag').innerText = tag; document.getElementById('confirm-price').innerText = price;
+            
+            // Сохраняем состояние приватности для отправки на сервер
+            document.getElementById('dynamic-confirm-btn').dataset.private = isPrivate;
+            
             document.getElementById('modal-step-1').style.display = 'block'; document.getElementById('modal-step-2').style.display = 'none'; document.getElementById('modal-step-3').style.display = 'none';
             document.getElementById('dynamic-confirm-btn').onclick = confirmAndSend;
             document.getElementById('dynamic-confirm-btn').innerText = currentLang === 'en' ? 'List and Start Timer' : 'Выставить и начать таймер';
@@ -1248,8 +1348,10 @@
         async function confirmAndSend() {
             const tag = document.getElementById('confirm-tag').innerText;
             const price = document.getElementById('confirm-price').innerText;
+            const isPrivate = document.getElementById('dynamic-confirm-btn').dataset.private === 'true'; // 💡 Отправляем флаг
+            
             try {
-                const res = await fetch(`${API_URL}/lots`, { method: 'POST', headers, body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price) }) });
+                const res = await fetch(`${API_URL}/lots`, { method: 'POST', headers, body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price), is_private: isPrivate }) });
                 const data = await res.json();
                 if (res.ok) { document.getElementById('modal-step-1').style.display = 'none'; document.getElementById('modal-step-2').style.display = 'block'; startTimer(data.lot_id); 
                 } else { showNotification(_t('error'), "error"); closeModal(); }
@@ -1398,7 +1500,6 @@
                 else { showNotification("Ошибка или код уже есть", "error"); }
             } catch(e) {}
         }
-
     </script>
 </body>
 </html>
