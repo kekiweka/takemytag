@@ -628,7 +628,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px; margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
                             <div><div style="font-size:11px; color:var(--text-dim);">Бюджет:</div><div style="color:var(--success); font-weight:800; font-size:16px;">${w.budget} TON</div></div>
                             <div style="font-size:11px; color:var(--text-dim);">От: ID${w.buyer_id} ${verifiedBadge}</div>
-                            <button class="buy-btn" style="background:#8b5cf6;" onclick="tg.openTelegramLink('https://t.me/TakeMyTag_bot')">${btnStr}</button>
+                            <button class="buy-btn" style="background:#8b5cf6;" onclick="openWTBOfferModal(${w.id}, ${w.budget})">${btnStr}</button>
                         </div>
                     </div>`;
                 }).join('');
@@ -654,6 +654,55 @@
                     fetchWTB();
                 } else { showNotification(_t('error'), "error"); closeActionModal(); }
             } catch (e) { showNotification(_t('error'), "error"); closeActionModal(); }
+        }
+
+        function openWTBOfferModal(wtbId, maxBudget) {
+            let titleStr = currentLang === 'en' ? 'Offer a Tag' : 'Предложить тег';
+            let tagStr = currentLang === 'en' ? 'Tag name (without @)' : 'Название тега (без @)';
+            let priceStr = currentLang === 'en' ? 'Price (TON)' : 'Цена (TON)';
+            let btnStr = currentLang === 'en' ? 'Send Offer' : 'Отправить предложение';
+
+            showActionModal(`
+                <h3 style="margin-top:0; color:#8b5cf6;">${titleStr}</h3>
+                <p style="font-size:12px; color:var(--text-dim); margin-bottom: 15px;">Бюджет покупателя: до <b>${maxBudget} TON</b></p>
+                <input type="text" id="wtb-offer-tag" placeholder="${tagStr}">
+                <input type="number" id="wtb-offer-price" placeholder="${priceStr}">
+                <div class="flex-btns">
+                    <button class="btn-cancel" onclick="closeActionModal()">${_t('cancel')}</button>
+                    <button class="btn-confirm" style="background:#8b5cf6;" onclick="submitWTBOffer(${wtbId})">${btnStr}</button>
+                </div>
+            `);
+        }
+
+        async function submitWTBOffer(wtbId) {
+            const tag = document.getElementById('wtb-offer-tag').value.trim().replace('@', '');
+            const price = parseFloat(document.getElementById('wtb-offer-price').value);
+
+            if (!tag || isNaN(price) || price <= 0) return showNotification(_t('error'), "error");
+
+            showActionModal(`<h3>${_t('loading')}</h3>`);
+            try {
+                const res = await fetch(`${API_URL}/wtb/${wtbId}/offer`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        seller_id: user.id,
+                        tag: tag,
+                        price: price
+                    })
+                });
+                
+                if (res.ok) {
+                    showNotification("✅ Предложение успешно отправлено!", "success");
+                    closeActionModal();
+                } else {
+                    showNotification(_t('error'), "error");
+                    closeActionModal();
+                }
+            } catch (e) {
+                showNotification(_t('error'), "error");
+                closeActionModal();
+            }
         }
 
         // 💡 НОВОЕ: ЛОГИКА РАДАРА
