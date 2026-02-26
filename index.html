@@ -169,6 +169,13 @@
             90% { opacity: 1; }
             100% { transform: translateY(-30vh) scale(1.1); opacity: 0; }
         }
+
+        /* 💡 Анимация для FOMO-бейджа */
+        @keyframes fomoPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
     </style>
 </head>
 <body>
@@ -325,6 +332,12 @@
                <b style="color:white;">Комиссия:</b><br>Система удерживает всего <b style="color: var(--accent-color);">3.5%</b> от суммы сделки.
             </p>
             <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
+
+            <p data-ru='<b style="color:white;">📢 Live-канал сделок:</b><br>Смотрите реальные покупки и отзывы в нашем <a href="https://t.me/TakeMyTag_Sales" style="color:var(--accent-color); font-weight:bold; text-decoration:none;">Официальном канале</a>.' 
+               data-en='<b style="color:white;">📢 Live Sales Channel:</b><br>Watch real purchases and reviews in our <a href="https://t.me/TakeMyTag_Sales" style="color:var(--accent-color); font-weight:bold; text-decoration:none;">Official Channel</a>.'>
+               <b style="color:white;">📢 Live-канал сделок:</b><br>Смотрите реальные покупки и отзывы в нашем <a href="https://t.me/TakeMyTag_Sales" style="color:var(--accent-color); font-weight:bold; text-decoration:none;">Официальном канале</a>.
+            </p>
+            <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
             
             <p data-ru='<b style="color:white;">Избранное:</b><br>Нажимайте 🤍 на витрине, чтобы отложить тег и быстро найти его в профиле во вкладке "Избранное".' 
                data-en='<b style="color:white;">Favorites:</b><br>Click heart icon 🤍 to save items for later in your Profile tab.'>
@@ -424,7 +437,7 @@
 
     <script>
         const BOT_USERNAME = "TakeMyTag_bot"; 
-        const ADMIN_ID = 1308339129; // 💡 ВАЖНО: Твой ID Администратора
+        const ADMIN_ID = 1308339129; 
 
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -510,7 +523,6 @@
                 if (percent >= 100) percent = 100;
                 percentEl.innerText = percent; 
                 barEl.style.width = percent + "%";
-                
                 if (percent === 100) { 
                     clearInterval(interval); 
                     setTimeout(() => { 
@@ -524,7 +536,6 @@
                 fetchUserData(); 
                 fetchLots(); 
                 fetchAuctions(); 
-                // 💡 ОТКРЫВАЕМ ПАНЕЛЬ АДМИНА ЕСЛИ ЭТО ТЫ
                 if (user.id === ADMIN_ID) {
                     document.getElementById('nav-admin').style.display = 'block';
                     loadAdminStats();
@@ -724,33 +735,65 @@
             tg.openTelegramLink(tgShareLink);
         }
 
-        function openPreviewModal(lotId, tag, price) {
+        // 💡 ИЗМЕНЕНО: ДЕТАЛЬНАЯ СТРАНИЦА ЛОТА С ИСТОРИЕЙ И FOMO
+        async function openPreviewModal(lotId, tag, price) {
+            // Увеличиваем просмотры
             fetch(`${API_URL}/lots/${lotId}/view`, { method: 'POST', headers }); 
-            let title = currentLang === 'en' ? 'Purchase Username' : 'Покупка юзернейма';
-            let status = currentLang === 'en' ? 'Ready to transfer' : 'Готов к передаче';
-            let guarantor = currentLang === 'en' ? 'Bot TakeMyTag' : 'Бот TakeMyTag';
-            let time = currentLang === 'en' ? 'Instant' : 'Мгновенно';
-            let btn = currentLang === 'en' ? 'Proceed to Payment' : 'Перейти к оплате';
+            
+            showActionModal(`<h3>${_t('loading')}</h3>`);
+            
+            try {
+                const res = await fetch(`${API_URL}/lots/${lotId}/details`, { headers });
+                const data = await res.json();
+                
+                let title = currentLang === 'en' ? 'Purchase Username' : 'Детали юзернейма';
+                let status = currentLang === 'en' ? 'Ready to transfer' : 'Готов к передаче';
+                let guarantor = currentLang === 'en' ? 'Bot TakeMyTag' : 'Бот TakeMyTag';
+                let time = currentLang === 'en' ? 'Instant' : 'Мгновенно';
+                let btn = currentLang === 'en' ? 'Proceed to Payment' : 'Перейти к оплате';
+                
+                // 💡 Эффект FOMO (Сколько человек лайкнуло лот)
+                let fomoHtml = '';
+                if (data.favorites_count > 0) {
+                    let fomoText = currentLang === 'en' 
+                        ? `❤️ Favorited by <b>${data.favorites_count}</b> people (Hurry up!)` 
+                        : `❤️ В избранном у <b>${data.favorites_count}</b> чел. (Успей забрать!)`;
+                    fomoHtml = `
+                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 10px; border-radius: 12px; font-size: 12px; margin-bottom: 15px; font-weight: 600; animation: fomoPulse 2s infinite;">
+                        ${fomoText}
+                    </div>`;
+                }
 
-            showActionModal(`
-                <div style="text-align: center;">
-                    <div style="font-size: 45px; margin-bottom: 5px;">💎</div>
-                    <h3 style="margin-top:0; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${title}</h3>
-                    <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h2 style="margin:0 0 5px 0; font-size: 26px; color: white; word-break: break-all;">@${tag}</h2>
-                        <div style="font-size: 24px; font-weight: 800; color: var(--accent-color);">${price} TON</div>
+                showActionModal(`
+                    <div style="text-align: center;">
+                        <div style="font-size: 45px; margin-bottom: 5px;">💎</div>
+                        <h3 style="margin-top:0; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${title}</h3>
+                        
+                        <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; margin-bottom: 15px;">
+                            <h2 style="margin:0 0 5px 0; font-size: 26px; color: white; word-break: break-all;">@${tag}</h2>
+                            <div style="font-size: 24px; font-weight: 800; color: var(--accent-color);">${price} TON</div>
+                        </div>
+                        
+                        ${fomoHtml}
+
+                        <div style="text-align: left; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1; line-height: 1.8;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>✅ <b>Status:</b></span> <span style="color:var(--success); font-weight:bold;">${status}</span></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>🛡 <b>Guarantor:</b></span> <span>${guarantor}</span></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>⏱ <b>Transfer:</b></span> <span>${time}</span></div>
+                            <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
+                            <div style="display:flex; justify-content:space-between;"><span>👁 <b>Views:</b></span> <span>${data.views || 0}</span></div>
+                        </div>
+
+                        <div class="flex-btns" style="flex-direction: column; gap: 10px;">
+                            <button class="btn-main" style="padding: 16px; font-size: 16px;" onclick="openBuyModal(${lotId}, ${price}, '${tag}')">${btn}</button>
+                            <button class="btn-cancel" onclick="closeActionModal()">${_t('cancel')}</button>
+                        </div>
                     </div>
-                    <div style="text-align: left; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1; line-height: 1.6;">
-                        <div>✅ <b>Status:</b> ${status}</div>
-                        <div>🛡 <b>Guarantor:</b> ${guarantor}</div>
-                        <div>⏱ <b>Transfer:</b> ${time}</div>
-                    </div>
-                    <div class="flex-btns" style="flex-direction: column; gap: 10px;">
-                        <button class="btn-main" style="padding: 16px; font-size: 16px;" onclick="openBuyModal(${lotId}, ${price}, '${tag}')">${btn}</button>
-                        <button class="btn-cancel" onclick="closeActionModal()">${_t('cancel')}</button>
-                    </div>
-                </div>
-            `);
+                `);
+            } catch (e) {
+                showNotification(_t('error'), "error");
+                closeActionModal();
+            }
         }
 
         let startParamProcessed = false;
@@ -907,7 +950,7 @@
                         typeName = t.type === 'deposit' ? 'Пополнение' : t.type === 'withdrawal' ? 'Вывод / Покупка' : t.type === 'sale_income' ? 'Продажа лота' : t.type === 'commission_fee' ? (t.amount > 0 ? 'Комиссия / Реферал' : 'Комиссия системы') : t.type;
                     }
                     let statusIcon = t.status === 'completed' ? '✅' : t.status === 'pending' ? '⏳' : '❌';
-                    return `<div style="background:rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding:12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;"><div><div style="font-weight:600; font-size:13px; margin-bottom:4px;">${statusIcon} ${typeName}</div><div style="color:var(--text-dim); font-size:11px;">${t.date}</div></div><div style="color:${color}; font-weight:800; font-size:15px;">${sign}${t.amount} TON</div></div>`;
+                    return `<div style="background:rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding:12px; border-radius:16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; text-align:left;"><div><div style="font-weight:600; font-size:13px; margin-bottom:4px;">${statusIcon} ${typeName}</div><div style="color:var(--text-dim); font-size:11px;">${t.date}</div></div><div style="color:${color}; font-weight:800; font-size:15px;">${sign}${t.amount} TON</div></div>`;
                 }).join('');
 
                 showActionModal(`<h3 style="margin-top:0; margin-bottom:15px;">${historyStr}</h3><div class="history-container" style="max-height:55vh; overflow-y:auto; padding-right:5px; margin-bottom:15px;">${txHtml}</div><button class="btn-main" onclick="closeActionModal()">${_t('ok')}</button>`);
@@ -1268,7 +1311,7 @@
         function closeModalAndRefresh() { closeModal(); fetchLots(); fetchAuctions(); if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); }
 
         // ==========================================
-        // 🛠 ЛОГИКА АДМИН-ПАНЕЛИ (Добавлена в твой код!)
+        // 🛠 ЛОГИКА АДМИН-ПАНЕЛИ 
         // ==========================================
         async function loadAdminStats() {
             try {
