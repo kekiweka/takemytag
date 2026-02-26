@@ -143,7 +143,7 @@
         }
         .lang-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
 
-        /* 💡 НОВЫЙ ЛОАДЕР С ЛЕТАЮЩИМИ ТЕГАМИ */
+        /* 💡 ИДЕАЛЬНЫЙ ЛОАДЕР С ЛЕТАЮЩИМИ ТЕГАМИ (3D Эффект) */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050505; z-index: 15000; display: none;
@@ -154,20 +154,20 @@
         .loader-bar-container { width: 60%; max-width: 250px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; z-index: 10;}
         .loader-bar { height: 100%; width: 0%; background: var(--accent-color); border-radius: 10px; box-shadow: 0 0 10px var(--accent-color); transition: width 0.1s linear; }
         
-        /* Стили для летающих тегов (Параллакс) */
         .floating-tag {
             position: absolute; font-weight: 800; white-space: nowrap; pointer-events: none;
             z-index: 1; user-select: none;
-            color: rgba(255, 255, 255, 0.15); /* Читаемый полупрозрачный белый */
+            color: rgba(255, 255, 255, 0.1); /* Полупрозрачный цвет */
             animation: floatUp linear infinite;
         }
-        /* Неоновое свечение для некоторых тегов */
-        .glow-blue { color: rgba(56, 189, 248, 0.2); text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        .glow-purple { color: rgba(139, 92, 246, 0.2); text-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
+        .glow-blue { color: rgba(56, 189, 248, 0.15); text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+        .glow-purple { color: rgba(139, 92, 246, 0.15); text-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
 
         @keyframes floatUp {
-            0% { transform: translateY(110vh); }
-            100% { transform: translateY(-30vh); }
+            0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-30vh) scale(1.1); opacity: 0; }
         }
     </style>
 </head>
@@ -187,16 +187,16 @@
     </div>
 
     <div id="loader">
-        <div class="floating-tag" style="left: 10%; animation-duration: 8s; animation-delay: 0s; font-size: 24px;">@durov</div>
-        <div class="floating-tag glow-blue" style="left: 70%; animation-duration: 10s; animation-delay: 1s; font-size: 32px;">@crow</div>
-        <div class="floating-tag" style="left: 25%; animation-duration: 7s; animation-delay: 2.5s; font-size: 20px;">@monk</div>
-        <div class="floating-tag" style="left: 80%; animation-duration: 9s; animation-delay: 0.5s; font-size: 28px;">@crypto</div>
-        <div class="floating-tag glow-purple" style="left: 15%; animation-duration: 11s; animation-delay: 4s; font-size: 36px;">@ton</div>
-        <div class="floating-tag" style="left: 60%; animation-duration: 8.5s; animation-delay: 3s; font-size: 22px;">@meta</div>
-        <div class="floating-tag" style="left: 40%; animation-duration: 9.5s; animation-delay: 1.5s; font-size: 26px;">@nuhao</div>
-        <div class="floating-tag" style="left: 85%; animation-duration: 7.5s; animation-delay: 3.5s; font-size: 20px;">@family</div>
-        <div class="floating-tag" style="left: 5%; animation-duration: 10.5s; animation-delay: 2s; font-size: 30px;">@fragment</div>
-        <div class="floating-tag glow-blue" style="left: 50%; animation-duration: 8s; animation-delay: 4.5s; font-size: 24px;">@market</div>
+        <div class="floating-tag" style="left: 10%; animation-duration: 12s; animation-delay: -2s; font-size: 24px;">@durov</div>
+        <div class="floating-tag glow-blue" style="left: 70%; animation-duration: 15s; animation-delay: -7s; font-size: 32px; filter: blur(1px);">@crow</div>
+        <div class="floating-tag" style="left: 25%; animation-duration: 10s; animation-delay: -4s; font-size: 20px; filter: blur(2px);">@monk</div>
+        <div class="floating-tag" style="left: 80%; animation-duration: 14s; animation-delay: -1s; font-size: 28px;">@crypto</div>
+        <div class="floating-tag glow-purple" style="left: 15%; animation-duration: 16s; animation-delay: -9s; font-size: 36px;">@ton</div>
+        <div class="floating-tag" style="left: 60%; animation-duration: 11s; animation-delay: -5s; font-size: 22px; filter: blur(1px);">@meta</div>
+        <div class="floating-tag" style="left: 40%; animation-duration: 13s; animation-delay: -8s; font-size: 26px;">@nuhao</div>
+        <div class="floating-tag" style="left: 85%; animation-duration: 12s; animation-delay: -3s; font-size: 20px; filter: blur(2px);">@family</div>
+        <div class="floating-tag" style="left: 5%; animation-duration: 15s; animation-delay: -11s; font-size: 30px;">@fragment</div>
+        <div class="floating-tag glow-blue" style="left: 50%; animation-duration: 14s; animation-delay: -6s; font-size: 24px; filter: blur(1px);">@market</div>
         
         <div style="z-index: 10; display: flex; flex-direction: column; align-items: center; position: relative;">
             <img src="logo.jpg" alt="Logo" class="loader-logo">
@@ -397,7 +397,7 @@
         let freeVipTickets = 0; 
         let timerInterval, statusInterval;
 
-        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS
+        // 💡 СЛОВАРЬ ПЕРЕВОДОВ ДЛЯ JS (Переводится ВСЁ)
         let currentLang = 'ru'; 
         const _dict = {
             'buy': {ru: 'Купить', en: 'Buy'},
@@ -443,32 +443,31 @@
             document.getElementById('wallet-status').innerText = tonConnectUI.connected ? _t('connected') : _t('connect_wallet');
         }
 
-        // 💡 ЛОГИКА ВЫБОРА ЯЗЫКА ПЕРЕД ЗАГРУЗКОЙ (БЕСШОВНЫЙ ПЕРЕХОД)
+        // 💡 ЛОГИКА: Показ лоадера ПОД экраном выбора языка (убирает мерцание)
         function selectLanguage(lang) {
             currentLang = lang;
             updateStaticTexts();
             
-            // Заранее показываем лоадер под экраном выбора языка
+            // Включаем лоадер заранее (он пока под черным экраном)
             const loader = document.getElementById('loader');
             loader.style.display = 'flex';
             loader.style.opacity = '1';
 
-            // Плавно прячем окно выбора языка
+            // Плавно растворяем экран выбора языка
             document.getElementById('lang-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('lang-screen').style.display = 'none';
-                startAppLoader(); // Запускаем прогресс-бар
+                startAppLoader(); // Только теперь запускаем бегунок процентов
             }, 500);
         }
 
-        // 💡 ЗАГРУЗКА РОВНО 3 СЕКУНДЫ
+        // ЗАГРУЗКА РОВНО 3 СЕКУНДЫ
         function startAppLoader() {
             let percent = 0;
             const percentEl = document.getElementById("loader-percent");
             const barEl = document.getElementById("loader-bar");
             const loader = document.getElementById('loader');
             
-            // 100 шагов по 30 мс = 3000 мс (3 секунды)
             const interval = setInterval(() => {
                 percent += 1; 
                 if (percent >= 100) percent = 100;
