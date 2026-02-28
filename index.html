@@ -8,6 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -106,14 +107,16 @@
         .glow-purple { color: rgba(139, 92, 246, 0.15); text-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
 
         @keyframes floatUp { 0% { transform: translateY(110vh) scale(0.8); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-30vh) scale(1.1); opacity: 0; } }
-
         @keyframes fomoPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         
-        /* 💡 Стили для бейджа лояльности */
         .loyalty-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-top: 5px; }
         .bronze { background: linear-gradient(135deg, #b45309, #78350f); color: white; box-shadow: 0 2px 10px rgba(180, 83, 9, 0.3); }
         .silver { background: linear-gradient(135deg, #94a3b8, #475569); color: white; box-shadow: 0 2px 10px rgba(148, 163, 184, 0.3); }
         .gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: black; box-shadow: 0 2px 10px rgba(251, 191, 36, 0.4); }
+        
+        /* 💡 Стили для графика */
+        .chart-container { position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .chart-center-text { position: absolute; text-align: center; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -211,10 +214,10 @@
     <div id="tab-wtb" class="tab-content">
         <div class="input-box glass-card">
             <div class="section-title" style="margin-top: 0;" data-ru="📢 Оставить заявку (WTB)" data-en="📢 Request to Buy (WTB)">📢 Оставить заявку (WTB)</div>
-            <p style="font-size:12px; color:var(--text-dim); margin-top:-10px;" data-ru="Напишите, какой тег вы ищете, и продавцы предложат вам варианты." data-en="Describe the tag you want, sellers will offer it.">Напишите, какой тег вы ищете, и продавцы предложат вам варианты.</p>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-10px;" data-ru="Напишите, какой тег вы ищете, и продавцы предложат вам варианты. Заявка появится после проверки модератором." data-en="Describe the tag you want, sellers will offer it. Appears after moderation.">Напишите, какой тег вы ищете, и продавцы предложат вам варианты. Заявка появится после проверки модератором.</p>
             <input type="text" id="wtb-desc-input" placeholder="Кого ищете? (например, 4 буквы)" data-ru="Кого ищете? (например, 4 буквы)" data-en="What are you looking for?">
             <input type="number" id="wtb-budget-input" placeholder="Бюджет (TON)" data-ru="Бюджет (TON)" data-en="Budget (TON)">
-            <button class="btn-main" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="submitWTB()" data-ru="Опубликовать заявку" data-en="Publish Request">Опубликовать заявку</button>
+            <button class="btn-main" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="submitWTB()" data-ru="Отправить на модерацию" data-en="Send for Moderation">Отправить на модерацию</button>
         </div>
         <div class="section-title" style="margin:0 0 12px 0;" data-ru="👀 Ищут прямо сейчас" data-en="👀 Looking to buy">👀 Ищут прямо сейчас</div>
         <div id="wtb-container"></div>
@@ -225,6 +228,14 @@
             <div style="text-align: center; margin-bottom: 20px;">
                 <div class="balance-label" id="profile-name" style="font-size: 16px; color: white; display:flex; align-items:center; justify-content:center; gap:6px;">Профиль загружается...</div>
                 <div id="loyalty-badge" class="loyalty-badge bronze" style="display:none;">Уровень загружается...</div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="balanceChart"></canvas>
+                <div class="chart-center-text">
+                    <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">Всего</div>
+                    <div id="total-balance-text" style="font-size: 20px; font-weight: 800; color: white; margin-top: 2px;">0 TON</div>
+                </div>
             </div>
             
             <div style="display: flex; justify-content: space-between; text-align: center; margin-bottom: 15px; gap:10px;">
@@ -295,26 +306,27 @@
                data-en='<b style="color:white;">Favorites:</b><br>Click heart icon 🤍 to save items for later in your Profile tab.'>
                <b style="color:white;">Избранное:</b><br>Нажимайте 🤍 на витрине, чтобы отложить тег и быстро найти его в профиле во вкладке "Избранное".
             </p>
-            <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-            <p data-ru='<b style="color:white;">Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b style="color:var(--success);">1%</b> с каждой их покупки в маркете или на аукционе!' 
-               data-en='<b style="color:white;">Referral System:</b><br>Invite friends via link and get <b style="color:var(--success);">1%</b> from every purchase they make!'>
-               <b style="color:white;">Реферальная система:</b><br>Приглашайте друзей по ссылке из профиля и получайте <b style="color:var(--success);">1%</b> с каждой их покупки в маркете или на аукционе!
-            </p>
-            <div style="height: 1px; background: var(--glass-border); margin: 15px 0;"></div>
-            <p data-ru='<b style="color:white;">Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет с помощью официальных Telegram Stars.' 
-               data-en='<b style="color:white;">Deposit Stars ⭐️:</b><br>You can deposit funds using official Telegram Stars.'>
-               <b style="color:white;">Пополнение баланса ⭐️:</b><br>Вы можете пополнить счет с помощью официальных Telegram Stars.
-            </p>
         </div>
+    </div>
+
+    <div id="tab-mod" class="tab-content">
+        <div class="balance-card glass-card">
+            <h2 style="margin:0 0 15px 0; color:#8b5cf6;">🛡 Модерация WTB</h2>
+            <button class="btn-main btn-small" style="background:rgba(255,255,255,0.1); border: 1px solid var(--glass-border);" onclick="loadModQueue()">🔄 Обновить очередь</button>
+        </div>
+        
+        <div class="section-title">📝 Заявки покупателей (WTB)</div>
+        <div id="mod-wtb-requests" style="margin-bottom: 25px;"></div>
+        
+        <div class="section-title">🤝 Отклики продавцов (Офферы)</div>
+        <div id="mod-wtb-offers"></div>
     </div>
 
     <div id="tab-admin" class="tab-content">
         <div class="balance-card glass-card">
             <h2 style="margin:0 0 15px 0;" data-ru="🛠 Панель Администратора" data-en="🛠 Admin Panel">🛠 Панель Администратора</h2>
             <button class="btn-main btn-small" style="background:rgba(255,255,255,0.1); border: 1px solid var(--glass-border); margin-bottom:15px;" onclick="loadAdminStats()" data-ru="Обновить статистику 🔄" data-en="Refresh Stats 🔄">Обновить статистику 🔄</button>
-            <div id="admin-stats" style="display:flex; justify-content:space-around; text-align:center; font-size:13px; color:var(--text-main);">
-                Загрузка...
-            </div>
+            <div id="admin-stats" style="display:flex; justify-content:space-around; text-align:center; font-size:13px; color:var(--text-main);">Загрузка...</div>
         </div>
         <div class="input-box glass-card">
             <h3 style="margin-top:0; display:flex; justify-content:space-between; align-items:center;">
@@ -348,7 +360,8 @@
         <div class="nav-item" onclick="switchTab('auctions', this)"><span class="nav-icon">⏳</span><span data-ru="Торги" data-en="Auctions">Торги</span></div>
         <div class="nav-item" onclick="switchTab('wtb', this)"><span class="nav-icon">📢</span><span data-ru="Заявки" data-en="WTB">Заявки</span></div>
         <div class="nav-item" onclick="switchTab('profile', this)"><span class="nav-icon">👤</span><span data-ru="Профиль" data-en="Profile">Профиль</span></div>
-        <div class="nav-item" onclick="switchTab('info', this)"><span class="nav-icon">ℹ️</span><span data-ru="Инфо" data-en="Info">Инфо</span></div>
+        <div class="nav-item" id="nav-info" onclick="switchTab('info', this)"><span class="nav-icon">ℹ️</span><span data-ru="Инфо" data-en="Info">Инфо</span></div>
+        <div class="nav-item" id="nav-mod" style="display:none;" onclick="switchTab('mod', this)"><span class="nav-icon">🛡</span><span>Мод</span></div>
         <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchTab('admin', this)"><span class="nav-icon">🛠</span><span data-ru="Админ" data-en="Admin">Админ</span></div>
     </div>
 
@@ -359,9 +372,7 @@
                 <div style="text-align:left; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
                     <p><span class="step-num">1</span> <span data-ru="Цена:" data-en="Price:">Цена:</span> <b id="confirm-price" style="color:white">0</b> TON</p>
                     <p><span class="step-num">2</span> <span data-ru="Передайте права владельца канала" data-en="Transfer channel ownership to">Передайте права владельца канала</span> <b>@<span id="confirm-tag" style="color:white"></span></b> <span data-ru="аккаунту:" data-en="account:">аккаунту:</span></p>
-                    <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; text-align:center; font-weight:bold; color:#38bdf8; font-size: 16px; border: 1px dashed #38bdf8;">
-                        @TakeMyTag1
-                    </div>
+                    <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; text-align:center; font-weight:bold; color:#38bdf8; font-size: 16px; border: 1px dashed #38bdf8;">@TakeMyTag1</div>
                     <p style="font-size:11px; color:var(--text-dim); margin-top:12px;" data-ru="🛡️ Юзербот автоматически выставит лот." data-en="🛡️ The bot will automatically list your item.">🛡️ Юзербот автоматически выставит лот.</p>
                 </div>
                 <button class="btn-main" id="dynamic-confirm-btn" style="margin-top: 25px;">Выставить и начать таймер</button>
@@ -390,7 +401,7 @@
         tg.expand();
         tg.setHeaderColor('#050505'); 
 
-        const API_URL = "https://rapt-noella-myriadly.ngrok-free.dev/api";
+        const API_URL = "https://rapt-noella-myriadly.ngrok-free.dev/api"; // 🔥 Не забудь поменять на Pinggy, если нужно!
         const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
         const user = tg.initDataUnsafe.user;
         
@@ -398,6 +409,7 @@
         let allAuctions = []; 
         let freeVipTickets = 0; 
         let timerInterval, statusInterval;
+        let balanceChart = null; // Для графика
 
         let currentLang = 'ru'; 
         const _dict = {
@@ -483,12 +495,7 @@
                 fetchUserData(); 
                 fetchLots(); 
                 fetchAuctions(); 
-                fetchWTB(); // Грузим заявки WTB
-                if (user.id === ADMIN_ID) {
-                    document.getElementById('nav-admin').style.display = 'block';
-                    loadAdminStats();
-                    loadAdminWithdrawals();
-                }
+                fetchWTB(); 
             }
         }
 
@@ -544,8 +551,50 @@
             document.getElementById('wallet-status').style.color = wallet ? "var(--success)" : "var(--text-main)";
         });
 
-        // 💡 ГЛОБАЛЬНЫЙ ОБЪЕКТ ЮЗЕРА (ДЛЯ РАДАРА)
         let currentUserData = null;
+
+        // 💡 НОВОЕ: ФУНКЦИЯ ОТРИСОВКИ ГРАФИКА
+        function renderBalanceChart(available, frozen, ref) {
+            const ctx = document.getElementById('balanceChart').getContext('2d');
+            const total = available + frozen; // Реферальные уже лежат в available, показываем только для визуала долей
+            
+            document.getElementById('total-balance-text').innerText = `${total.toFixed(2)} TON`;
+
+            if (balanceChart) balanceChart.destroy(); // Удаляем старый график, если есть
+
+            // Если баланс 0, рисуем серый пустой круг
+            const dataVals = total > 0 ? [available - ref, frozen, ref] : [1];
+            const bgColors = total > 0 ? ['#10b981', '#f59e0b', '#38bdf8'] : ['#333333'];
+
+            balanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Доступно (свои)', 'В холде', 'Реферальные'],
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: bgColors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%', // Делаем дырку внутри побольше
+                    plugins: {
+                        legend: { display: false }, // Прячем стандартную легенду
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(total === 0) return ' Пусто';
+                                    return ` ${context.parsed.toFixed(2)} TON`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         async function fetchUserData() {
             if (!user) return;
@@ -555,7 +604,7 @@
             try {
                 const res = await fetch(refId ? `${API_URL}/users/${user.id}?ref_id=${refId}` : `${API_URL}/users/${user.id}`, { headers });
                 const data = await res.json();
-                currentUserData = data; // Сохраняем для радара
+                currentUserData = data; 
                 
                 const verifiedIcon = data.is_verified ? svgCheckmark : '';
                 document.getElementById('profile-name').innerHTML = `Привет, ${user.first_name}! ${verifiedIcon}`;
@@ -563,7 +612,20 @@
                 document.getElementById('froz-balance').innerText = `${data.frozen_balance.toFixed(2)} TON`;
                 if(document.getElementById('ref-earnings')) document.getElementById('ref-earnings').innerText = `${(data.ref_earnings || 0).toFixed(2)} TON`;
 
-                // 💡 ОТРИСОВКА БЕЙДЖА ЛОЯЛЬНОСТИ
+                // Отрисовка графика
+                renderBalanceChart(data.available_balance, data.frozen_balance, data.ref_earnings);
+
+                // Если юзер модератор или админ — показываем вкладки
+                if (data.is_moderator || user.id === ADMIN_ID) {
+                    document.getElementById('nav-info').style.display = 'none'; // Прячем Инфо, чтобы не было тесно
+                    document.getElementById('nav-mod').style.display = 'block';
+                }
+                if (user.id === ADMIN_ID) {
+                    document.getElementById('nav-admin').style.display = 'block';
+                    loadAdminStats();
+                    loadAdminWithdrawals();
+                }
+
                 const loyaltyBadge = document.getElementById('loyalty-badge');
                 if (data.loyalty_level === "Бронза") { loyaltyBadge.className = "loyalty-badge bronze"; }
                 else if (data.loyalty_level === "Серебро") { loyaltyBadge.className = "loyalty-badge silver"; }
@@ -585,7 +647,6 @@
                     ticketsDisplay.style.display = 'block';
                 } else { ticketsDisplay.style.display = 'none'; }
                 
-                // Кнопка рефералов с процентом
                 document.getElementById('ref-btn').innerText = currentLang === 'ru' ? `🔗 Пригласить друга (${data.loyalty_percent}%)` : `🔗 Invite Friend (${data.loyalty_percent}%)`;
                 
             } catch (e) { }
@@ -609,7 +670,6 @@
             } catch (e) { }
         }
 
-        // 💡 НОВОЕ: ЗАГРУЗКА БИРЖИ WTB
         async function fetchWTB() {
             try {
                 const res = await fetch(`${API_URL}/wtb`, { headers });
@@ -647,11 +707,10 @@
                     body: JSON.stringify({ buyer_id: user.id, description: desc, budget: budget }) 
                 });
                 if (res.ok) { 
-                    showNotification(_t('success'), "success"); 
+                    showNotification("Успешно! Заявка отправлена модераторам.", "success"); 
                     closeActionModal(); 
                     document.getElementById('wtb-desc-input').value = '';
                     document.getElementById('wtb-budget-input').value = '';
-                    fetchWTB();
                 } else { showNotification(_t('error'), "error"); closeActionModal(); }
             } catch (e) { showNotification(_t('error'), "error"); closeActionModal(); }
         }
@@ -660,7 +719,7 @@
             let titleStr = currentLang === 'en' ? 'Offer a Tag' : 'Предложить тег';
             let tagStr = currentLang === 'en' ? 'Tag name (without @)' : 'Название тега (без @)';
             let priceStr = currentLang === 'en' ? 'Price (TON)' : 'Цена (TON)';
-            let btnStr = currentLang === 'en' ? 'Send Offer' : 'Отправить предложение';
+            let btnStr = currentLang === 'en' ? 'Send for Moderation' : 'Отправить на проверку';
 
             showActionModal(`
                 <h3 style="margin-top:0; color:#8b5cf6;">${titleStr}</h3>
@@ -685,15 +744,11 @@
                 const res = await fetch(`${API_URL}/wtb/${wtbId}/offer`, {
                     method: 'POST',
                     headers,
-                    body: JSON.stringify({
-                        seller_id: user.id,
-                        tag: tag,
-                        price: price
-                    })
+                    body: JSON.stringify({ seller_id: user.id, tag: tag, price: price })
                 });
                 
                 if (res.ok) {
-                    showNotification("✅ Предложение успешно отправлено!", "success");
+                    showNotification("✅ Отправлено модератору!", "success");
                     closeActionModal();
                 } else {
                     showNotification(_t('error'), "error");
@@ -705,7 +760,6 @@
             }
         }
 
-        // 💡 НОВОЕ: ЛОГИКА РАДАРА
         async function openRadarMenu() {
             if (!currentUserData) return;
             let titleStr = currentLang === 'en' ? `📡 Smart Radar` : `📡 Умный Радар`;
@@ -773,7 +827,6 @@
                 else { showNotification(_t('error'), "error"); }
             } catch(e) { showNotification(_t('error'), "error"); }
         }
-
 
         async function toggleFavorite(lotId) {
             if (!user) return showNotification(currentLang === 'en' ? "Login required!" : "Авторизуйтесь!", "error");
@@ -933,7 +986,6 @@
                 const targetLot = allLots.find(l => l.id === targetLotId);
                 if (targetLot) { openPreviewModal(targetLot.id, targetLot.target_username, targetLot.price); startParamProcessed = true; }
             }
-            // 💡 НОВОЕ: ЕСЛИ ЭТО P2P СДЕЛКА
             if (startParam && startParam.startsWith('p2p_')) {
                 const targetLotId = parseInt(startParam.replace('p2p_', ''));
                 fetch(`${API_URL}/lots/${targetLotId}/details`, { headers })
@@ -1027,7 +1079,6 @@
                     if (lot.seller_id === user.id) {
                         holdText = `<br>${_t('hold_after')} <b style="color:var(--warning);">${(lot.price * 0.965).toFixed(2)} TON</b>`;
                         
-                        // 💡 ЕСЛИ ЛОТ ПРИВАТНЫЙ, ВЫВОДИМ ССЫЛКУ ДЛЯ P2P
                         if (lot.is_private) {
                             holdText += `<br><span style="color:#8b5cf6; font-size:11px;">Отправьте эту ссылку покупателю:</span><br><code style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px; user-select:all;">https://t.me/${BOT_USERNAME}/app?startapp=p2p_${lot.id}</code>`;
                         }
@@ -1375,17 +1426,17 @@
             if(tabId === 'market') fetchLots();
             if(tabId === 'auctions') fetchAuctions();
             if(tabId === 'wtb') fetchWTB();
+            if(tabId === 'mod') loadModQueue(); // Грузим заявки, если перешли в МОД
         }
 
         function openConfirmModal() {
             const tag = document.getElementById('username-input').value.replace('@', '').trim();
             const price = document.getElementById('price-input').value;
-            const isPrivate = document.getElementById('is-private-checkbox').checked; // 💡 Считываем галочку
+            const isPrivate = document.getElementById('is-private-checkbox').checked;
             
             if (!tag || !price) return showNotification(_t('error'), "error");
             document.getElementById('confirm-tag').innerText = tag; document.getElementById('confirm-price').innerText = price;
             
-            // Сохраняем состояние приватности для отправки на сервер
             document.getElementById('dynamic-confirm-btn').dataset.private = isPrivate;
             
             document.getElementById('modal-step-1').style.display = 'block'; document.getElementById('modal-step-2').style.display = 'none'; document.getElementById('modal-step-3').style.display = 'none';
@@ -1397,7 +1448,7 @@
         async function confirmAndSend() {
             const tag = document.getElementById('confirm-tag').innerText;
             const price = document.getElementById('confirm-price').innerText;
-            const isPrivate = document.getElementById('dynamic-confirm-btn').dataset.private === 'true'; // 💡 Отправляем флаг
+            const isPrivate = document.getElementById('dynamic-confirm-btn').dataset.private === 'true';
             
             try {
                 const res = await fetch(`${API_URL}/lots`, { method: 'POST', headers, body: JSON.stringify({ user_id: user.id, target_username: tag, price: parseFloat(price), is_private: isPrivate }) });
@@ -1460,6 +1511,68 @@
 
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; clearInterval(timerInterval); clearInterval(statusInterval); }
         function closeModalAndRefresh() { closeModal(); fetchLots(); fetchAuctions(); if(document.getElementById('tab-profile').classList.contains('active')) renderProfile(); }
+
+        // ==========================================
+        // 🛡 ЛОГИКА ВКЛАДКИ "МОД" (Для модераторов)
+        // ==========================================
+        async function loadModQueue() {
+            if (!user) return;
+            try {
+                const res = await fetch(`${API_URL}/mod/pending?user_id=${user.id}`, { headers });
+                const data = await res.json();
+                
+                const reqContainer = document.getElementById('mod-wtb-requests');
+                const offContainer = document.getElementById('mod-wtb-offers');
+
+                // Отрисовка заявок
+                if (data.requests.length === 0) { reqContainer.innerHTML = `<div style="color:var(--text-dim); text-align:center;">Нет новых заявок</div>`; }
+                else {
+                    reqContainer.innerHTML = data.requests.map(r => `
+                        <div class="input-box glass-card" style="padding:15px; margin-bottom:10px;">
+                            <div style="font-size:12px; color:var(--text-dim);">Покупатель: ID${r.buyer_id}</div>
+                            <div style="font-size:14px; margin: 10px 0;">"${r.desc}"</div>
+                            <div style="color:var(--success); font-weight:bold; margin-bottom:10px;">Бюджет: ${r.budget} TON</div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-main btn-small" style="background:var(--success); flex:1;" onclick="processModItem('wtb', ${r.id}, 'approve')">✅ Одобрить</button>
+                                <button class="btn-main btn-small" style="background:var(--error); flex:1;" onclick="processModItem('wtb', ${r.id}, 'reject')">❌ Отклонить</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // Отрисовка офферов
+                if (data.offers.length === 0) { offContainer.innerHTML = `<div style="color:var(--text-dim); text-align:center;">Нет новых откликов</div>`; }
+                else {
+                    offContainer.innerHTML = data.offers.map(o => `
+                        <div class="input-box glass-card" style="padding:15px; margin-bottom:10px;">
+                            <div style="font-size:12px; color:var(--text-dim);">Продавец: ID${o.seller_id}</div>
+                            <div style="font-size:14px; margin: 10px 0;">Предлагает тег: <b style="color:var(--accent-color);">@${o.tag}</b></div>
+                            <div style="color:white; font-weight:bold; margin-bottom:10px;">Цена: ${o.price} TON</div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-main btn-small" style="background:var(--success); flex:1;" onclick="processModItem('offer', ${o.id}, 'approve')">✅ Пропустить</button>
+                                <button class="btn-main btn-small" style="background:var(--error); flex:1;" onclick="processModItem('offer', ${o.id}, 'reject')">❌ Удалить</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { showNotification("Ошибка загрузки модерации", "error"); }
+        }
+
+        async function processModItem(type, id, action) {
+            try {
+                const res = await fetch(`${API_URL}/mod/${type}/${id}`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ user_id: user.id, action: action })
+                });
+                if (res.ok) {
+                    showNotification("Успешно!", "success");
+                    loadModQueue(); // Перезагружаем список
+                } else {
+                    showNotification("Ошибка обработки", "error");
+                }
+            } catch (e) { showNotification("Ошибка", "error"); }
+        }
 
         // ==========================================
         // 🛠 ЛОГИКА АДМИН-ПАНЕЛИ 
