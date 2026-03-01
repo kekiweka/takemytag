@@ -402,7 +402,10 @@
         tg.setHeaderColor('#050505'); 
 
         const API_URL = "https://rapt-noella-myriadly.ngrok-free.dev/api"; // 🔥 Не забудь поменять на Pinggy, если нужно!
-        const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
+        const headers = { 
+            'Content-Type': 'application/json', 
+            'ngrok-skip-browser-warning': 'true',
+            'X-TG-Data': tg.initData
         const user = tg.initDataUnsafe.user;
         
         let allLots = [];
