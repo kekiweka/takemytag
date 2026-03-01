@@ -406,6 +406,8 @@
             'Content-Type': 'application/json', 
             'ngrok-skip-browser-warning': 'true',
             'X-TG-Data': tg.initData
+        }; // <--- ВОТ ЗДЕСЬ НЕ ХВАТАЛО ЗАКРЫВАЮЩЕЙ СКОБКИ!
+        
         const user = tg.initDataUnsafe.user;
         
         let allLots = [];
